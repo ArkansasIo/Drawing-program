@@ -57,3 +57,17 @@ const libraryData={
 };
 const lib=document.querySelector("#library");
 Object.entries(libraryData).forEach(([cat,items])=>{const box=document.createElement("div");box.className="libcat";box.innerHTML="<h4>"+cat+"</h4>";items.forEach(item=>{const b=document.createElement("button");b.textContent=item;b.onclick=()=>{document.querySelector("#genout").textContent="HOW TO DRAW — "+item+"\n\nStep 1: Basic construction\nStep 2: Proportions and perspective\nStep 3: Clean anime/manga line work\nStep 4: Details, lighting and finishing\n\nPractice this subject on the canvas.";document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));document.querySelector("#generator").classList.add("active")};box.appendChild(b)});lib.appendChild(box)});
+
+
+let layerState=[{name:"Line Art",visible:true,opacity:100}],activeLayer=0,onion=false;
+function renderLayers(){const box=document.querySelector("#layerList");if(!box)return;box.innerHTML="";layerState.forEach((l,i)=>{const row=document.createElement("div");row.className="layer-row"+(i===activeLayer?" active":"");row.innerHTML="<span>"+(l.visible?"◉":"○")+" "+l.name+"</span><small>"+l.opacity+"%</small>";row.onclick=()=>{activeLayer=i;renderLayers()};box.appendChild(row)})}
+document.querySelector("#addLayer")?.addEventListener("click",()=>{layerState.unshift({name:"Layer "+(layerState.length+1),visible:true,opacity:100});activeLayer=0;renderLayers()});
+document.querySelector("#duplicateLayer")?.addEventListener("click",()=>{const l=layerState[activeLayer];layerState.splice(activeLayer,0,{...l,name:l.name+" Copy"});renderLayers()});
+document.querySelector("#deleteLayer")?.addEventListener("click",()=>{if(layerState.length===1)return;layerState.splice(activeLayer,1);activeLayer=Math.min(activeLayer,layerState.length-1);renderLayers()});
+renderLayers();
+
+let transformMode="none",selectionMode="none";
+["selectionRect","selectionFree"].forEach(id=>document.querySelector("#"+id)?.addEventListener("click",()=>{selectionMode=id==="selectionRect"?"rectangle":"free";transformMode="none";document.querySelector("#transformStatus").textContent="Selection: "+selectionMode}));
+["transformMove","transformRotate","transformScale"].forEach(id=>document.querySelector("#"+id)?.addEventListener("click",()=>{transformMode=id.replace("transform","").toLowerCase();document.querySelector("#transformStatus").textContent="Transform: "+transformMode}));
+document.querySelector("#flipHorizontal")?.addEventListener("click",()=>{ctx.save();ctx.translate(canvas.clientWidth,0);ctx.scale(-1,1);ctx.drawImage(canvas,0,0,canvas.clientWidth,canvas.clientHeight);ctx.restore();document.querySelector("#transformStatus").textContent="Flip horizontal applied"});
+document.querySelector("#onionSkin")?.addEventListener("click",()=>{onion=!onion;document.querySelector("#onionSkin").textContent=onion?"◉ Onion Skin: ON":"◌ Onion Skin";document.querySelector("#guide").style.opacity=onion?".35":"1"});
