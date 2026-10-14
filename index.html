@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Drawing Program — Anime Studio</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><strong>DRAWING PROGRAM</strong><span>ANIME / MANGA STUDIO</span><button id="export">Export PNG</button></header>
+<div class="workspace">
+<aside class="tools">
+<button class="tool active" data-tool="pencil">✎ Pencil</button><button class="tool" data-tool="ink">✒ Ink</button>
+<button class="tool" data-tool="marker">▰ Marker</button><button class="tool" data-tool="airbrush">◌ Airbrush</button>
+<button class="tool" data-tool="eraser">⌫ Eraser</button><button class="tool" data-tool="fill">▧ Fill</button>
+<hr><label>Size <input id="size" type="range" min="1" max="80" value="6"></label>
+<label>Opacity <input id="opacity" type="range" min="1" max="100" value="100"></label>
+<input id="color" type="color" value="#20202a">
+<div class="palette" id="palette"></div>
+<hr><button id="undo">Undo</button><button id="redo">Redo</button><button id="clear">Clear</button>
+</aside>
+<main><div class="canvas-wrap"><canvas id="canvas"></canvas></div></main>
+<aside class="layers"><h3>Layers</h3><div id="layers"></div><button id="addLayer">＋ New Layer</button><hr>
+<label><input id="grid" type="checkbox"> Grid</label><label><input id="symmetry" type="checkbox"> Mirror</label>
+</aside>
+</div>
+<footer><span id="status">Pencil • 6 px • 100%</span><span>Touch / mouse / stylus ready</span></footer>
+<script src="app.js"></script>
+</body></html>
