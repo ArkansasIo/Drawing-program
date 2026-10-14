@@ -216,3 +216,7 @@ Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) before openin
 - Studio Settings persist theme, autosave preference, grid, symmetry and default FPS in local storage.
 - Anime Studio identity is exposed as `anime-studio` for integration and diagnostics.
 - GitHub Pages validation includes all current `src/` production modules.
+
+
+### Production Runtime Architecture
+The studio now has a modular runtime under `src/`: animation timeline, asset/provenance registry, storyboard, rigging, camera tracks, project persistence, tool registry, render queue, generator, lip-sync, 3D stage, and a central `studio-runtime.js` integration layer. The browser UI remains lightweight while production state is represented as serializable JavaScript objects suitable for future backend/cloud persistence.
