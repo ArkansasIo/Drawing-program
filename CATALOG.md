@@ -394,3 +394,14 @@ The following systems are tracked so the editor can grow into a complete 2D anim
 - `src/tools.js` — centralized tool registry for drawing, paint, selection, transform, design, guides and viewport tools.
 - `src/render.js` — render presets and queued render-job state.
 - `src/studio-runtime.js` — central runtime wiring for the production subsystems.
+
+
+## Additional Core Source Modules
+- `src/selection.js` — rectangle/polygon selection geometry and hit testing.
+- `src/keyframes.js` — numeric/array interpolation and easing tracks.
+- `src/audio.js` — dialogue, music, ambience and SFX track/clip state.
+- `src/importer.js` — text, image and JSON project import helpers.
+- `src/validation.js` — studio-state validation and diagnostics.
+- `src/stage-state.js` — serializable 2.5D/3D stage and card state.
+- `src/undo.js` — bounded command history for undo/redo integration.
+- `src/serialization.js` — project JSON/text download helpers.
