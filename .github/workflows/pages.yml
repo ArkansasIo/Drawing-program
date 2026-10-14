@@ -39,6 +39,15 @@ jobs:
           test -f src/stage3d.js
           test -f src/studio-init.js
           test -f src/lipsync.js
+          test -f src/animation.js
+          test -f src/assets.js
+          test -f src/storyboard.js
+          test -f src/rigging.js
+          test -f src/camera.js
+          test -f src/project.js
+          test -f src/tools.js
+          test -f src/render.js
+          test -f src/studio-runtime.js
       - name: Upload Anime Studio
         uses: actions/upload-pages-artifact@v3
         with:
