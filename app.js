@@ -11,7 +11,7 @@ canvas.addEventListener("pointerdown",e=>{if(tool==="fill")return;save();drawing
 canvas.addEventListener("pointermove",e=>{if(!drawing)return;const p=point(e);stroke(last,p);last=p});
 canvas.addEventListener("pointerup",()=>{drawing=false;last=null});
 document.querySelectorAll(".tool").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tool").forEach(x=>x.classList.remove("active"));b.classList.add("active");tool=b.dataset.tool;status()});
-function status(){document.querySelector("#status").textContent=tool+" • "+document.querySelector("#size").value+" px • "+document.querySelector("#opacity").value+"%"}
+function status(){const el=document.querySelector("#status");if(el)el.textContent=tool+" • "+document.querySelector("#size").value+" px • "+document.querySelector("#opacity").value+"%";}
 document.querySelector("#size").oninput=status;document.querySelector("#opacity").oninput=status;
 document.querySelector("#undo").onclick=()=>{if(history.length>1){future.push(history.pop());restore(history.at(-1))}};
 document.querySelector("#redo").onclick=()=>{if(future.length){const u=future.pop();history.push(u);restore(u)}};
