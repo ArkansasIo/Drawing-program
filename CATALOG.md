@@ -382,3 +382,15 @@ The following systems are tracked so the editor can grow into a complete 2D anim
 - Local Studio Settings are persisted and restorable.
 - Lip-sync source module: `src/lipsync.js`.
 - Hybrid 3D stage drift correction is implemented in `src/stage3d.js`.
+
+
+## Expanded Production Source Modules
+- `src/animation.js` — timeline model, FPS, frames, holds and onion-skin state.
+- `src/assets.js` — searchable asset registry, categories, tags, license/provenance and manifest export.
+- `src/storyboard.js` — shot/panel creation, ordering, duration, dialogue, action, camera and notes.
+- `src/rigging.js` — bones, IK controls, reusable actions and keyframes.
+- `src/camera.js` — camera transforms, bookmarks and keyframes.
+- `src/project.js` — scenes, shots, project serialization and local persistence.
+- `src/tools.js` — centralized tool registry for drawing, paint, selection, transform, design, guides and viewport tools.
+- `src/render.js` — render presets and queued render-job state.
+- `src/studio-runtime.js` — central runtime wiring for the production subsystems.
