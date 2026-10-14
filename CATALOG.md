@@ -354,3 +354,22 @@ The following systems are tracked so the editor can grow into a complete 2D anim
 - Preferences
 - Localization
 - Accessibility
+
+
+## Generated Asset Source System
+- **implemented** Modular anime asset generator source module.
+- **implemented** Editable character-part generation model.
+- **implemented** Modular clothing-set generation model with attachment points and material metadata.
+- **implemented** Style palettes for modern anime, dark fantasy, classic fantasy, supernatural action, warm adventure and moonlit blue.
+- **implemented** Generator workflow data for characters, faces, bodies, chibi characters, creatures, vehicles, buildings, landscapes, interiors and props.
+
+## Hybrid 2D × 3D Stage
+- **implemented** Three.js WebGL stage module.
+- **implemented** 2D artwork cards represented as planes in 3D space.
+- **implemented** Perspective and orthographic camera modes.
+- **implemented** X/Y/Z depth staging.
+- **implemented** Drag orbit and wheel camera movement.
+- **implemented** Anime-oriented ambient, key and rim lighting.
+- **implemented** Fog and controlled cinematic background.
+- **planned** Full asset-texture import pipeline from the project asset browser.
+- **planned** production-grade cel shader and outline renderer.
