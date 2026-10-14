@@ -25,8 +25,17 @@ document.querySelector("#generate").onclick=()=>{const s=document.querySelector(
 document.querySelector("#addPanel").onclick=()=>document.querySelector("#genout").textContent="MANGA PANEL\n\nPanel added to storyboard. Compose character, background and dialogue inside the canvas.";
 document.querySelector("#speech").onclick=()=>document.querySelector("#genout").textContent="SPEECH BUBBLE\n\nSpeech-bubble placement guide added.";
 document.querySelector("#speed").onclick=()=>document.querySelector("#genout").textContent="SPEED LINES\n\nAction-line guide added.";
-document.querySelector("#grid").onchange=e=>document.querySelector("#guide").style.backgroundImage=e.target.checked?"linear-gradient(#ffffff12 1px,transparent 1px),linear-gradient(90deg,#ffffff12 1px,transparent 1px)":"none";
-document.querySelector("#symmetry").onchange=()=>{};
+const grid=document.querySelector("#grid"); if(grid) grid.onchange=e=>document.querySelector("#guide").style.backgroundImage=e.target.checked?"linear-gradient(#ffffff12 1px,transparent 1px),linear-gradient(90deg,#ffffff12 1px,transparent 1px)":"none";
+const symmetry=document.querySelector("#symmetry"); if(symmetry) symmetry.onchange=()=>{};
+let frames=[canvas.toDataURL()],currentFrame=0;
+function renderTimeline(){const t=document.querySelector("#timeline");if(!t)return;t.innerHTML="";frames.forEach((_,i)=>{const b=document.createElement("button");b.className="frame"+(i===currentFrame?" active":"");b.innerHTML="F"+(i+1)+"<small>"+i+"</small>";b.onclick=()=>{frames[currentFrame]=canvas.toDataURL();currentFrame=i;restore(frames[i]);renderTimeline()};t.appendChild(b)});const f=document.querySelector("#frameStatus"),fps=document.querySelector("#fps");if(f)f.textContent="Frame "+(currentFrame+1)+" / "+frames.length+" • "+(fps?.value||12)+" FPS"}
+document.querySelector("#fps")?.addEventListener("input",renderTimeline);
+document.querySelector("#addFrame")?.addEventListener("click",()=>{frames[currentFrame]=canvas.toDataURL();frames.push(frames[currentFrame]);currentFrame=frames.length-1;restore(frames[currentFrame]);renderTimeline()});
+document.querySelector("#duplicateFrame")?.addEventListener("click",()=>{frames[currentFrame]=canvas.toDataURL();frames.splice(currentFrame+1,0,frames[currentFrame]);currentFrame++;renderTimeline()});
+document.querySelector("#deleteFrame")?.addEventListener("click",()=>{if(frames.length===1)return;frames.splice(currentFrame,1);currentFrame=Math.min(currentFrame,frames.length-1);restore(frames[currentFrame]);renderTimeline()});
+document.querySelector("#newScene")?.addEventListener("click",()=>document.querySelector("#genout").textContent="NEW SCENE\n\nScene created. Add shots, characters, backgrounds and animation frames.");
+document.querySelector("#newShot")?.addEventListener("click",()=>document.querySelector("#genout").textContent="NEW SHOT\n\nShot created. Use the viewport for composition and the timeline for animation.");
+renderTimeline();
 status();
 
 const libraryData={
