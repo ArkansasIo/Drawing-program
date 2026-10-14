@@ -36,7 +36,7 @@ function restore(data){
   runtime.rig.bones=data.rig?.bones||[];runtime.rig.controls=data.rig?.controls||[];runtime.rig.actions=data.rig?.actions||[];runtime.rig.name=data.rig?.name||"Character Rig";
   runtime.camera.fromJSON(data.camera||{});runtime.assets.fromJSON(data.assets||[]);runtime.audio.tracks=data.audio?.tracks||[];runtime.audio.master=data.audio?.master??1;runtime.stage.fromJSON(data.stage||{});
   runtime.tracks={};Object.entries(data.tracks||{}).forEach(([k,v])=>{const t=new KeyframeTrack(v.property||k);t.keys=v.keys||[];runtime.tracks[k]=t});
-  renderTimeline();renderAssets();renderRig();renderStage();setText("masterVolume",Math.round(runtime.audio.master*100));setText("renderStatus","Project restored.");
+  renderTimeline();renderAssets();renderRig();renderStage();if($("#masterVolume"))$("#masterVolume").value=Math.round(runtime.audio.master*100);setText("renderStatus","Project restored.");
   runtime.project.touch();
 }
 
@@ -44,7 +44,7 @@ function renderTimeline(){
   const box=$("#timeline");if(box){box.innerHTML="";runtime.timeline.frames.forEach((_,i)=>{const b=document.createElement("button");b.textContent=String(i+1);b.className=i===runtime.timeline.current?"active":"";b.onclick=()=>runtime.timeline.select(i);box.appendChild(b)})}
   setText("frameStatus",`Frame ${runtime.timeline.current+1} / ${runtime.timeline.frames.length} • ${runtime.timeline.fps} FPS • Onion ${runtime.timeline.onion?"ON":"OFF"}`);
 }
-runtime.timeline.subscribe(renderTimeline);
+runtime.timeline.subscribe(t=>{renderTimeline();const b=$("#playAnimation");if(b)b.textContent=t.playing?"■ Stop":"▶ Play"});
 $("#fps")?.addEventListener("input",e=>runtime.timeline.setFPS(e.target.value));
 $("#addFrame")?.addEventListener("click",()=>runtime.timeline.addFrame(false));
 $("#duplicateFrame")?.addEventListener("click",()=>runtime.timeline.addFrame(true));
@@ -87,6 +87,7 @@ $("#addVoiceTrack")?.addEventListener("click",()=>{const text=$("#voiceScript")?
 $("#selectionClear")?.addEventListener("click",()=>{runtime.selection.clear();setText("transformStatus","Selection cleared.")});
 ["selectionRect","selectionFree"].forEach(id=>$("#"+id)?.addEventListener("click",()=>{runtime.selection.type=id==="selectionRect"?"rectangle":"polygon";setText("transformStatus",`Selection mode: ${runtime.selection.type}`)}));
 
+$("#renderSequence")?.addEventListener("click",()=>{const job=runtime.render.add({format:"png-sequence",frames:runtime.timeline.frames.length,status:"queued"});setText("renderStatus",`Sequence job ${job.id} queued for ${job.frames} frames. Each frame still needs its own cel drawing before a true animated sequence can be rendered.`)});
 $("#renderExport")?.addEventListener("click",async()=>{const canvas=$("#canvas"),fmt=($("#renderFormat")?.value||"PNG").toLowerCase(),scale=+($("#renderScale")?.value||1);const mime=fmt==="jpeg"?"image/jpeg":fmt==="webp"?"image/webp":"image/png";const outCanvas=document.createElement("canvas");outCanvas.width=canvas.width*scale;outCanvas.height=canvas.height*scale;const c=outCanvas.getContext("2d");c.drawImage(canvas,0,0,outCanvas.width,outCanvas.height);const a=document.createElement("a");a.download=`anime-studio-frame-${runtime.timeline.current+1}.${mime==="image/jpeg"?"jpg":mime==="image/webp"?"webp":"png"}`;a.href=outCanvas.toDataURL(mime,.92);a.click();runtime.render.add({format:fmt,scale,frame:runtime.timeline.current,status:"complete"});setText("renderStatus",`Exported ${fmt} at ${scale}×.`)});
 
 window.saveAnimeProject=()=>{const data=snapshot();localStorage.setItem("anime-studio-project",JSON.stringify(data));return data};
