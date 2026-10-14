@@ -2,3 +2,14 @@
 .effect-stack{display:grid;gap:5px}.effect-row{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:4px;background:#20242c;border:1px solid #343a46;padding:5px;border-radius:3px}.effect-row span{font-size:11px;color:#d7dce5}.effect-row button{width:auto;margin:0;padding:3px 7px}.effect-row button:last-child{color:#ff9dbc}
 
 .layer-list{display:grid;gap:4px;margin-top:7px}.layer-row{display:flex;justify-content:space-between;align-items:center;background:#20242c;border:1px solid #343a46;border-radius:3px;padding:7px;color:#cfd4de;cursor:pointer}.layer-row.active{border-color:var(--accent);background:#2c2530}.layer-row small{color:#858d9b}.side .panel button{min-height:30px}
+
+/* Hybrid 2D/3D stage */
+.canvas-wrap{position:relative;overflow:hidden;background:#0d1018}
+#stage3dViewport{position:absolute;inset:0;z-index:2;min-height:260px;pointer-events:auto;background:radial-gradient(circle at 50% 35%,#20283a 0,#0d1018 68%);border:1px solid #2e3544}
+#stage3dViewport.stage-hidden{display:none}
+#stage3dViewport .stage3d-canvas{display:block;width:100%;height:100%;touch-action:none}
+#canvas{position:relative;z-index:1}
+.stage-card{font-family:inherit}
+.generator-parts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.generator-parts button{font-size:11px}
+@media(max-width:900px){#stage3dViewport{min-height:220px}}
