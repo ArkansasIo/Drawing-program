@@ -38,6 +38,7 @@ jobs:
           test -f src/generator.js
           test -f src/stage3d.js
           test -f src/studio-init.js
+          test -f src/lipsync.js
       - name: Upload Anime Studio
         uses: actions/upload-pages-artifact@v3
         with:
