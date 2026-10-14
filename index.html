@@ -11,7 +11,7 @@
 <button class="tool active" data-tool="pencil">✎ Pencil</button><button class="tool" data-tool="ink">✒ Ink</button><button class="tool" data-tool="marker">▰ Marker</button><button class="tool" data-tool="airbrush">◌ Airbrush</button><button class="tool" data-tool="eraser">⌫ Eraser</button><button class="tool" data-tool="fill">▧ Fill</button><button class="tool" data-tool="eyedropper">◉ Picker</button>
 <hr><label>Size <input id="size" type="range" min="1" max="80" value="6"></label><label>Opacity <input id="opacity" type="range" min="1" max="100" value="100"></label><input id="color" type="color" value="#20202a"><div class="palette" id="palette"></div><hr>
 <button id="undo">Undo</button><button id="redo">Redo</button><button id="clear">Clear</button></aside>
-<main><div id="guide" class="guide"></div><div class="canvas-wrap"><canvas id="canvas"></canvas></div></main>
+<main><div id="guide" class="guide"></div><div class="canvas-wrap"><canvas id="canvas"></canvas><div id="stage3dViewport" aria-label="3D anime stage"></div></div></main>
 <aside class="side">
 <section id="project" class="panel active"><h3>Project</h3><label>Project type<select id="projectType"><option>Anime Short</option><option>Cartoon Short</option><option>Anime Episode</option><option>Animated Movie</option><option>Manga / Comic</option><option>Character Sheet</option></select></label><button id="newScene">＋ New Scene</button><button id="newShot">＋ New Shot</button><p class="muted">Unreal-style production workspace for drawn animation.</p></section>
 <section id="howto" class="panel"><h3>How to Draw</h3><ol><li>Construction</li><li>Line art</li><li>Flat colors</li><li>Shadows and highlights</li></ol><button class="lesson" data-lesson="head">Head & Face</button><button class="lesson" data-lesson="eyes">Anime Eyes</button><button class="lesson" data-lesson="hair">Hair</button><button class="lesson" data-lesson="body">Body & Anatomy</button><button class="lesson" data-lesson="hands">Hands & Feet</button><button class="lesson" data-lesson="clothes">Clothing</button></section>
@@ -31,4 +31,4 @@
 <section id="tools" class="panel"><h3>Editor Tools</h3><p>Viewport: draw and inspect the current frame.</p><p>Content Browser: reusable anime/cartoon assets.</p><p>Layers: organize the art stack.</p><p>Timeline: animation frames and timing.</p><p>Select / Transform: isolate and manipulate artwork.</p></section>
 </aside></div>
 <footer><span id="status">Pencil • 6 px • 100%</span><span>Viewport • Content Browser • Layers • Timeline</span></footer>
-<script src="app.js"></script></body></html>
+<script src="app.js"></script><script type="module" src="src/studio-init.js"></script></body></html>
