@@ -1,20 +1,25 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Drawing Program — Anime Drawing Studio</title><link rel="stylesheet" href="style.css"></head>
+<title>Anime Studio — Drawing & Animation</title><link rel="stylesheet" href="style.css"></head>
 <body>
-<header><strong>DRAWING PROGRAM</strong><span>日本アニメ / MANGA DRAWING STUDIO</span><button id="export">Export PNG</button></header>
-<div class="menu"><button data-panel="howto">How to Draw</button><button data-panel="generator">Generator</button><button data-panel="references">Reference Library</button><button data-panel="panels">Manga Panels</button><button data-panel="tools">Drawing Tools</button></div>
-<div class="workspace"><aside class="tools" id="toolPanel"><h3>Tools</h3>
+<header><strong>ANIME STUDIO</strong><span>DRAW • ANIMATE • STORYBOARD</span><button id="export">Export PNG</button></header>
+<nav class="menu">
+<button data-panel="project">Project</button><button data-panel="howto">How to Draw</button><button data-panel="generator">Generator</button><button data-panel="references">Content Browser</button><button data-panel="animation">Animation</button><button data-panel="panels">Storyboard</button><button data-panel="tools">Tools</button>
+</nav>
+<div class="workspace">
+<aside class="tools" id="toolPanel"><h3>Tools</h3>
 <button class="tool active" data-tool="pencil">✎ Pencil</button><button class="tool" data-tool="ink">✒ Ink</button><button class="tool" data-tool="marker">▰ Marker</button><button class="tool" data-tool="airbrush">◌ Airbrush</button><button class="tool" data-tool="eraser">⌫ Eraser</button><button class="tool" data-tool="fill">▧ Fill</button>
 <hr><label>Size <input id="size" type="range" min="1" max="80" value="6"></label><label>Opacity <input id="opacity" type="range" min="1" max="100" value="100"></label><input id="color" type="color" value="#20202a"><div class="palette" id="palette"></div><hr>
 <button id="undo">Undo</button><button id="redo">Redo</button><button id="clear">Clear</button></aside>
 <main><div id="guide" class="guide"></div><div class="canvas-wrap"><canvas id="canvas"></canvas></div></main>
 <aside class="side">
-<section id="howto" class="panel active"><h3>How to Draw Anime</h3><ol><li>Construction</li><li>Line art</li><li>Flat colors</li><li>Shadows and highlights</li></ol><button class="lesson" data-lesson="head">Head & Face</button><button class="lesson" data-lesson="eyes">Anime Eyes</button><button class="lesson" data-lesson="hair">Hair</button><button class="lesson" data-lesson="body">Body & Anatomy</button><button class="lesson" data-lesson="hands">Hands & Feet</button><button class="lesson" data-lesson="clothes">Clothing</button></section>
-<section id="generator" class="panel"><h3>Anime Generator</h3><label>Subject <select id="subject"><option>Character</option><option>Face</option><option>Full Body</option><option>Chibi</option><option>Creature</option><option>Building</option><option>Vehicle</option><option>Landscape</option><option>Interior</option><option>Prop</option></select></label><label>Style <select id="style"><option>Modern Anime</option><option>Shonen</option><option>Shojo</option><option>Seinen</option><option>Chibi</option><option>Manga Ink</option><option>Anime Background</option></select></label><button id="generate">Generate Guide</button><pre id="genout">Choose a subject and style.</pre></section>
-<section id="references" class="panel"><h3>Anime Reference Library</h3><p>Step-by-step construction sheets and visual study guides.</p>
-<div class="library" id="library"></div></section>
-<section id="panels" class="panel"><h3>Manga Panel Tools</h3><button id="addPanel">＋ Add Panel</button><button id="speech">＋ Speech Bubble</button><button id="speed">＋ Speed Lines</button><p>Compose storyboard pages and anime scenes.</p></section>
+<section id="project" class="panel active"><h3>Project</h3><label>Project type<select id="projectType"><option>Anime Short</option><option>Cartoon Short</option><option>Anime Episode</option><option>Animated Movie</option><option>Manga / Comic</option><option>Character Sheet</option></select></label><button id="newScene">＋ New Scene</button><button id="newShot">＋ New Shot</button><p class="muted">Unreal-style production workspace for drawn animation.</p></section>
+<section id="howto" class="panel"><h3>How to Draw</h3><ol><li>Construction</li><li>Line art</li><li>Flat colors</li><li>Shadows and highlights</li></ol><button class="lesson" data-lesson="head">Head & Face</button><button class="lesson" data-lesson="eyes">Anime Eyes</button><button class="lesson" data-lesson="hair">Hair</button><button class="lesson" data-lesson="body">Body & Anatomy</button><button class="lesson" data-lesson="hands">Hands & Feet</button><button class="lesson" data-lesson="clothes">Clothing</button></section>
+<section id="generator" class="panel"><h3>Generator</h3><label>Subject <select id="subject"><option>Character</option><option>Face</option><option>Full Body</option><option>Chibi</option><option>Creature</option><option>Building</option><option>Vehicle</option><option>Landscape</option><option>Interior</option><option>Prop</option></select></label><label>Style <select id="style"><option>Modern Anime</option><option>Shonen</option><option>Shojo</option><option>Seinen</option><option>Chibi</option><option>Manga Ink</option><option>Anime Background</option><option>Cartoon</option><option>Comic Book</option><option>Pixel Art</option><option>Storybook</option></select></label><button id="generate">Generate Guide</button><pre id="genout">Choose a subject and style.</pre></section>
+<section id="references" class="panel"><h3>Content Browser</h3><p>Reusable construction sheets, design studies, clothing, props, environments and assets.</p><div class="library" id="library"></div></section>
+<section id="animation" class="panel"><h3>Animation</h3><button id="addFrame">＋ Add Frame</button><button id="duplicateFrame">⧉ Duplicate Frame</button><button id="deleteFrame">− Delete Frame</button><label>FPS <input id="fps" type="range" min="1" max="30" value="12"></label><p id="frameStatus">Frame 1 / 1 • 12 FPS</p><div id="timeline" class="timeline"></div></section>
+<section id="panels" class="panel"><h3>Storyboard</h3><button id="addPanel">＋ Add Panel</button><button id="speech">＋ Speech Bubble</button><button id="speed">＋ Speed Lines</button><p>Compose shots, camera framing, dialogue and action beats.</p></section>
+<section id="tools" class="panel"><h3>Editor Tools</h3><p>Viewport: draw and inspect the current frame.</p><p>Content Browser: reusable anime/cartoon assets.</p><p>Details: current lesson, generator or scene settings.</p><p>Timeline: animation frames and timing.</p></section>
 </aside></div>
-<footer><span id="status">Pencil • 6 px • 100%</span><span>Touch / mouse / stylus ready • Japanese anime workflow</span></footer>
+<footer><span id="status">Pencil • 6 px • 100%</span><span>Viewport • Content Browser • Details • Timeline</span></footer>
 <script src="app.js"></script></body></html>
