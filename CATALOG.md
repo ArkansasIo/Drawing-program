@@ -171,3 +171,186 @@ The following systems are tracked so the editor can grow into a complete 2D anim
 
 ### Development / Build Identity
 - **implemented** Project/build identity metadata and developer-credit surface are to be maintained consistently across the app and documentation.
+
+
+## Anime Studio-Class Tool Suite
+
+### Drawing & Paint
+- Brush/Pencil with pressure, size, opacity and stabilization
+- Ink/Pen with taper and pressure response
+- Marker, airbrush and textured brushes
+- Eraser with alpha erase
+- Fill/bucket with contiguous and tolerance modes
+- Paint-bucket gap closing and reference-layer fill
+- Color picker, palette editor and color history
+- Gradient, pattern and texture paint
+- Line, polyline, rectangle, ellipse, polygon and curve tools
+- Rulers, guides, grids and snapping
+- Symmetry and mirror drawing
+- Perspective guides
+- Lasso, rectangle, ellipse and magic-wand selection
+- Transform, warp, mesh deformation and puppet-style editing
+- Crop, resize, rotate and flip
+- Clone/heal-style raster retouching
+- Text and typography
+- Vector paths, stroke/fill editing and shape layers
+
+### Layer & Compositing
+- Raster paint layers
+- Vector layers
+- Group/folder layers
+- Layer ordering, visibility and opacity
+- Blend modes
+- Alpha lock
+- Clipping layers
+- Layer masks
+- Selection masks
+- Adjustment layers
+- Compositing groups
+- Shadow, glow, outline and blur effects
+
+### Anime / Cel Production
+- Rough/sketch/clean-line/flat/shadow/highlight layer workflow
+- Cel paint and color-key management
+- Line-art-to-flat color workflow
+- Reference-layer coloring
+- Locked palettes and color sets
+- Shadow/highlight passes
+- Manga screentones
+- Speed lines
+- Impact frames
+- Smear/FX frames
+- Background and foreground separation
+- Character turnarounds and model sheets
+- Expression sheets
+- Pose sheets
+
+### Character Rigging
+- Bone creation and hierarchy
+- IK/FK controls
+- Pin/target controls
+- Bone constraints
+- Smart bone/actions
+- Deformation bones
+- Mesh/point binding
+- Cutout character parts
+- Reusable character rigs
+- Switchable hand/face/eye poses
+- Reusable actions
+- Rig templates
+
+### Animation
+- Frame-by-frame animation
+- Timeline and exposure sheet
+- Keyframes and holds
+- Breakdowns and in-betweens
+- Onion skin
+- Playback and looping
+- Keyframe interpolation
+- Motion tweening
+- Bone animation
+- Point/mesh animation
+- Camera animation
+- Layer animation
+- Audio-synchronized timing
+- Dope sheet
+- Graph/curve editor
+- Animation clips/actions
+- Scene and shot timelines
+- Nested scenes/precomps
+- Lip-sync markers and phoneme tracks
+
+### Camera & Scene
+- 2D camera framing
+- Camera pan, zoom, rotate and shake
+- Safe areas and title/action guides
+- Multi-plane camera
+- 2D parallax
+- Scene composition
+- Shot/scene hierarchy
+- Background plates
+- Foreground overlays
+- Depth ordering
+- Camera bookmarks
+
+### Audio
+- Audio asset library
+- Dialogue/voice tracks
+- Music tracks
+- Sound-effect tracks
+- Ambience tracks
+- Multi-track timeline
+- Waveform display
+- Clip trim/split/duplicate
+- Fade in/out
+- Gain and normalization
+- Pan and volume automation
+- Audio markers
+- Voice recording
+- Basic noise cleanup
+- Music loops
+- Procedural SFX generation
+- Lip-sync timing from dialogue
+
+### Storyboard & Preproduction
+- Storyboard panels
+- Shot numbering
+- Thumbnails
+- Dialogue notes
+- Action notes
+- Camera notes
+- Timing/duration
+- Scene continuity
+- Character/asset references
+- Animatic playback
+- Exportable storyboard sheets
+
+### Asset & Content Browser
+- Character library
+- Pose library
+- Expression library
+- Clothing library
+- Prop library
+- Creature library
+- Vehicle/mecha library
+- Background library
+- FX library
+- Sound library
+- Music library
+- Voice/dialogue library
+- Tags, search, favorites and metadata
+- License/provenance fields
+- Project-local asset packages
+- Reusable templates
+
+### Rendering & Export
+- Transparent PNG
+- JPEG/WebP
+- Image sequences
+- Sprite sheets
+- Animated GIF/WebM
+- MP4 production render
+- Audio/video mux
+- Resolution presets
+- Frame-rate presets
+- Alpha export
+- Render regions
+- Background color/plate options
+- Manga/page export
+- PDF production sheets
+
+### Workflow & Productivity
+- Project/scene/shot/frame organization
+- Autosave and recovery
+- Undo/redo history
+- Keyboard shortcuts
+- Custom workspaces
+- Dockable panels
+- Asset drag/drop
+- Copy/paste between layers and frames
+- Reference images
+- Notes and annotations
+- Search/command palette
+- Preferences
+- Localization
+- Accessibility
