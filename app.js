@@ -59,15 +59,98 @@ const lib=document.querySelector("#library");
 Object.entries(libraryData).forEach(([cat,items])=>{const box=document.createElement("div");box.className="libcat";box.innerHTML="<h4>"+cat+"</h4>";items.forEach(item=>{const b=document.createElement("button");b.textContent=item;b.onclick=()=>{document.querySelector("#genout").textContent="HOW TO DRAW — "+item+"\n\nStep 1: Basic construction\nStep 2: Proportions and perspective\nStep 3: Clean anime/manga line work\nStep 4: Details, lighting and finishing\n\nPractice this subject on the canvas.";document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));document.querySelector("#generator").classList.add("active")};box.appendChild(b)});lib.appendChild(box)});
 
 
-let layerState=[{name:"Line Art",visible:true,opacity:100}],activeLayer=0,onion=false;
-function renderLayers(){const box=document.querySelector("#layerList");if(!box)return;box.innerHTML="";layerState.forEach((l,i)=>{const row=document.createElement("div");row.className="layer-row"+(i===activeLayer?" active":"");row.innerHTML="<span>"+(l.visible?"◉":"○")+" "+l.name+"</span><small>"+l.opacity+"%</small>";row.onclick=()=>{activeLayer=i;renderLayers()};box.appendChild(row)})}
-document.querySelector("#addLayer")?.addEventListener("click",()=>{layerState.unshift({name:"Layer "+(layerState.length+1),visible:true,opacity:100});activeLayer=0;renderLayers()});
-document.querySelector("#duplicateLayer")?.addEventListener("click",()=>{const l=layerState[activeLayer];layerState.splice(activeLayer,0,{...l,name:l.name+" Copy"});renderLayers()});
-document.querySelector("#deleteLayer")?.addEventListener("click",()=>{if(layerState.length===1)return;layerState.splice(activeLayer,1);activeLayer=Math.min(activeLayer,layerState.length-1);renderLayers()});
-renderLayers();
+
+// --- Core 2D layer/compositing engine ---
+let layerState=[
+  {name:"Background",visible:true,opacity:100,canvas:null},
+  {name:"Line Art",visible:true,opacity:100,canvas:null}
+],activeLayer=1,onion=false,selection=null;
+
+function makeLayer(name){
+  const lc=document.createElement("canvas");
+  lc.width=canvas.width; lc.height=canvas.height;
+  return {name,visible:true,opacity:100,canvas:lc};
+}
+function initLayers(){
+  layerState.forEach(l=>{if(!l.canvas)l.canvas=makeLayer(l.name).canvas});
+  activeLayer=Math.min(activeLayer,layerState.length-1);
+  renderLayers(); renderComposite();
+}
+function renderComposite(){
+  const w=canvas.clientWidth,h=canvas.clientHeight;
+  ctx.save(); ctx.setTransform(devicePixelRatio||1,0,0,devicePixelRatio||1,0,0);
+  ctx.clearRect(0,0,w,h); ctx.fillStyle="#fff"; ctx.fillRect(0,0,w,h);
+  layerState.slice().reverse().forEach(l=>{
+    if(!l.visible||!l.canvas)return;
+    ctx.globalAlpha=l.opacity/100; ctx.drawImage(l.canvas,0,0,w,h);
+  });
+  ctx.globalAlpha=1; ctx.restore();
+  updateEffects();
+}
+function activeLayerCtx(){return layerState[activeLayer]?.canvas?.getContext("2d")}
+function snapshotLayers(){
+  return layerState.map(l=>({name:l.name,visible:l.visible,opacity:l.opacity,data:l.canvas?.toDataURL("image/png")||null}));
+}
+function restoreLayers(snap){
+  if(!Array.isArray(snap))return;
+  let pending=snap.length;
+  snap.forEach((s,i)=>{
+    if(!layerState[i])layerState[i]=makeLayer(s.name||("Layer "+(i+1)));
+    layerState[i].name=s.name;layerState[i].visible=s.visible!==false;layerState[i].opacity=s.opacity??100;
+    if(s.data){const im=new Image;im.onload=()=>{const lc=layerState[i].canvas,cc=lc.getContext("2d");cc.clearRect(0,0,lc.width,lc.height);cc.drawImage(im,0,0,lc.width,lc.height);if(--pending<=0)renderComposite()};im.src=s.data}else if(--pending<=0)renderComposite();
+  });
+  layerState.length=snap.length; renderLayers();
+}
+history=[];future=[];
+function save(){history.push(snapshotLayers());if(history.length>40)history.shift();future=[]}
+function restore(s){restoreLayers(s)}
+function resizeLayers(){
+  const w=canvas.width,h=canvas.height;
+  layerState.forEach(l=>{if(!l.canvas){l.canvas=document.createElement("canvas")}if(l.canvas.width!==w||l.canvas.height!==h){const old=document.createElement("canvas");old.width=l.canvas.width;old.height=l.canvas.height;old.getContext("2d").drawImage(l.canvas,0,0);l.canvas.width=w;l.canvas.height=h;if(old.width&&old.height)l.canvas.getContext("2d").drawImage(old,0,0,w,h)}});
+}
+function resize(){
+  const w=Math.max(320,Math.min(innerWidth-430,1100)),h=Math.max(260,Math.min(innerHeight-150,750)),d=devicePixelRatio||1;
+  const oldW=canvas.clientWidth||w,oldH=canvas.clientHeight||h;
+  canvas.width=w*d;canvas.height=h*d;canvas.style.width=w+"px";canvas.style.height=h+"px";
+  resizeLayers();ctx.setTransform(d,0,0,d,0,0);renderComposite();
+}
+addEventListener("resize",resize);
+
+function point(e){const r=canvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}
+function stroke(a,b){
+  const lc=activeLayerCtx();if(!lc)return;
+  const size=+document.querySelector("#size").value,op=+document.querySelector("#opacity").value/100,color=document.querySelector("#color").value,d=devicePixelRatio||1;
+  lc.save();lc.globalAlpha=op;lc.lineCap="round";lc.lineJoin="round";lc.lineWidth=(tool==="ink"?Math.max(1,size*.7):size)*d;
+  lc.strokeStyle=tool==="eraser"?"rgba(0,0,0,1)":color;lc.globalCompositeOperation=tool==="eraser"?"destination-out":"source-over";
+  if(tool==="airbrush"){lc.globalAlpha=op*.12;lc.shadowBlur=size*2*d;lc.shadowColor=color}else lc.shadowBlur=0;
+  lc.beginPath();lc.moveTo(a.x*d,a.y*d);lc.lineTo(b.x*d,b.y*d);lc.stroke();
+  if(document.querySelector("#symmetry")?.checked){lc.beginPath();lc.moveTo((canvas.clientWidth-b.x)*d,b.y*d);lc.lineTo((canvas.clientWidth-a.x)*d,a.y*d);lc.stroke()}
+  lc.restore();renderComposite();
+}
+canvas.addEventListener("pointerdown",e=>{if(tool==="fill"||selectionMode!=="none"||transformMode!=="none")return;save();drawing=true;last=point(e);canvas.setPointerCapture(e.pointerId)});
+canvas.addEventListener("pointermove",e=>{if(!drawing)return;const p=point(e);stroke(last,p);last=p});
+canvas.addEventListener("pointerup",()=>{drawing=false;last=null});
+canvas.addEventListener("pointercancel",()=>{drawing=false;last=null});
+
+function renderLayers(){
+  const box=document.querySelector("#layerList");if(!box)return;box.innerHTML="";
+  layerState.forEach((l,i)=>{
+    const row=document.createElement("div");row.className="layer-row"+(i===activeLayer?" active":"");
+    const label=document.createElement("span");label.textContent=(l.visible?"◉ ":"○ ")+l.name;
+    const controls=document.createElement("span");
+    const vis=document.createElement("button");vis.textContent=l.visible?"◉":"○";vis.title="Toggle visibility";vis.onclick=e=>{e.stopPropagation();l.visible=!l.visible;renderLayers();renderComposite()};
+    const op=document.createElement("input");op.type="range";op.min=0;op.max=100;op.value=l.opacity;op.title="Layer opacity";op.style.width="65px";op.onclick=e=>e.stopPropagation();op.oninput=e=>{l.opacity=+e.target.value;renderComposite()};
+    controls.append(vis,op);row.append(label,controls);row.onclick=()=>{activeLayer=i;renderLayers()};box.appendChild(row)
+  });
+}
+document.querySelector("#addLayer")?.addEventListener("click",()=>{const l=makeLayer("Layer "+(layerState.length+1));layerState.splice(activeLayer+1,0,l);activeLayer++;renderLayers();save()});
+document.querySelector("#duplicateLayer")?.addEventListener("click",()=>{const src=layerState[activeLayer],l=makeLayer(src.name+" Copy"),cc=l.canvas.getContext("2d");cc.drawImage(src.canvas,0,0);l.visible=src.visible;l.opacity=src.opacity;layerState.splice(activeLayer,0,l);renderLayers();renderComposite();save()});
+document.querySelector("#deleteLayer")?.addEventListener("click",()=>{if(layerState.length===1)return;save();layerState.splice(activeLayer,1);activeLayer=Math.min(activeLayer,layerState.length-1);renderLayers();renderComposite()});
 
 let transformMode="none",selectionMode="none";
-["selectionRect","selectionFree"].forEach(id=>document.querySelector("#"+id)?.addEventListener("click",()=>{selectionMode=id==="selectionRect"?"rectangle":"free";transformMode="none";document.querySelector("#transformStatus").textContent="Selection: "+selectionMode}));
-["transformMove","transformRotate","transformScale"].forEach(id=>document.querySelector("#"+id)?.addEventListener("click",()=>{transformMode=id.replace("transform","").toLowerCase();document.querySelector("#transformStatus").textContent="Transform: "+transformMode}));
-document.querySelector("#flipHorizontal")?.addEventListener("click",()=>{ctx.save();ctx.translate(canvas.clientWidth,0);ctx.scale(-1,1);ctx.drawImage(canvas,0,0,canvas.clientWidth,canvas.clientHeight);ctx.restore();document.querySelector("#transformStatus").textContent="Flip horizontal applied"});
-document.querySelector("#onionSkin")?.addEventListener("click",()=>{onion=!onion;document.querySelector("#onionSkin").textContent=onion?"◉ Onion Skin: ON":"◌ Onion Skin";document.querySelector("#guide").style.opacity=onion?".35":"1"});
+["selectionRect","selectionFree"].forEach(id=>document.querySelector("#"+id)?.addEventListener("click",()=>{selectionMode=id==="selectionRect"?"rectangle":"free";transformMode="none";document.querySelector("#transformStatus").textContent="Selection: "+selectionMode+" (geometry next)"}));
+["transformMove","transformRotate","transformScale"].forEach(id=>document.querySelector("#"+id)?.addEventListener("click",()=>{transformMode=id.replace("transform","").toLowerCase();document.querySelector("#transformStatus").textContent="Transform: "+transformMode+" (selection required)"}));
+document.querySelector("#flipHorizontal")?.addEventListener("click",()=>{save();const src=layerState[activeLayer].canvas,out=document.createElement("canvas");out.width=src.width;out.height=src.height;const oc=out.getContext("2d");oc.translate(src.width,0);oc.scale(-1,1);oc.drawImage(src,0,0);const cc=src.getContext("2d");cc.clearRect(0,0,src.width,src.height);cc.drawImage(out,0,0);renderComposite();document.querySelector("#transformStatus").textContent="Flip horizontal applied"});
+document.querySelector("#onionSkin")?.addEventListener("click",()=>{onion=!onion;document.querySelector("#onionSkin").textContent=onion?"◉ Onion Skin: ON":"◌ Onion Skin";renderComposite()});
+
+initLayers();
