@@ -4,7 +4,7 @@
 <body>
 <header><strong>ANIME STUDIO</strong><span>DRAW • ANIMATE • STORYBOARD</span><button id="export">Export PNG</button></header>
 <nav class="menu">
-<button data-panel="project">Project</button><button data-panel="howto">How to Draw</button><button data-panel="generator">Generator</button><button data-panel="references">Content Browser</button><button data-panel="animation">Animation</button><button data-panel="panels">Storyboard</button><button data-panel="tools">Tools</button>
+<button data-panel="project">Project</button><button data-panel="howto">How to Draw</button><button data-panel="generator">Generator</button><button data-panel="references">Content Browser</button><button data-panel="animation">Animation</button><button data-panel="panels">Storyboard</button><button data-panel="tools">Tools</button><button data-panel="effects">Image FX</button>
 </nav>
 <div class="workspace">
 <aside class="tools" id="toolPanel"><h3>Tools</h3>
@@ -19,6 +19,7 @@
 <section id="references" class="panel"><h3>Content Browser</h3><p>Reusable construction sheets, design studies, clothing, props, environments and assets.</p><div class="library" id="library"></div></section>
 <section id="animation" class="panel"><h3>Animation</h3><button id="addFrame">＋ Add Frame</button><button id="duplicateFrame">⧉ Duplicate Frame</button><button id="deleteFrame">− Delete Frame</button><label>FPS <input id="fps" type="range" min="1" max="30" value="12"></label><p id="frameStatus">Frame 1 / 1 • 12 FPS</p><div id="timeline" class="timeline"></div></section>
 <section id="panels" class="panel"><h3>Storyboard</h3><button id="addPanel">＋ Add Panel</button><button id="speech">＋ Speech Bubble</button><button id="speed">＋ Speed Lines</button><p>Compose shots, camera framing, dialogue and action beats.</p></section>
+<section id="effects" class="panel"><h3>Non-Destructive Image FX</h3><p>Effects are stacked for preview and export; the original drawing remains editable.</p><label>Effect <select id="effectType"><option value="grayscale">Grayscale</option><option value="sepia">Sepia</option><option value="invert">Invert</option><option value="brightness">Brightness</option><option value="contrast">Contrast</option><option value="saturate">Saturation</option><option value="blur">Soft Blur</option></select></label><label>Amount <input id="effectAmount" type="range" min="0" max="200" value="100"></label><button id="addEffect">＋ Add Effect</button><button id="clearEffects">Clear Effects</button><h4>Effect Stack</h4><div id="effectStack" class="effect-stack"></div><p class="muted">Anime presets: cel-shading support, screentones and speed-line effects are planned extensions.</p></section>
 <section id="tools" class="panel"><h3>Editor Tools</h3><p>Viewport: draw and inspect the current frame.</p><p>Content Browser: reusable anime/cartoon assets.</p><p>Details: current lesson, generator or scene settings.</p><p>Timeline: animation frames and timing.</p></section>
 </aside></div>
 <footer><span id="status">Pencil • 6 px • 100%</span><span>Viewport • Content Browser • Details • Timeline</span></footer>
