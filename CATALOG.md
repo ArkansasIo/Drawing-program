@@ -373,3 +373,12 @@ The following systems are tracked so the editor can grow into a complete 2D anim
 - **implemented** Fog and controlled cinematic background.
 - **planned** Full asset-texture import pipeline from the project asset browser.
 - **planned** production-grade cel shader and outline renderer.
+
+
+## Production Control Completion
+- Menu routing and studio panel IDs are present for Project, How to Draw, Generator, Content Browser, Animation, Layers, Select/Transform, Storyboard, Tools, Image FX, Audio, Voice Over, Rigging, Camera, Render, Assets, 3D Stage and Settings.
+- Fill and color-picker input paths are implemented.
+- Audio import, generated browser audio and track controls are implemented.
+- Local Studio Settings are persisted and restorable.
+- Lip-sync source module: `src/lipsync.js`.
+- Hybrid 3D stage drift correction is implemented in `src/stage3d.js`.
