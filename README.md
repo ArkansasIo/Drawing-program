@@ -1,15 +1,185 @@
-# Drawing-program\n\nFull-stack anime and manga drawing studio.\n\n## 1. Use the drawing studio\n1. Open the web application.\n2. Choose **How to Draw** for guided lessons.\n3. Choose **Reference Library** for characters, buildings, vehicles, creatures, environments, props, clothing, scenes, and manga.\n4. Choose a reference topic.\n5. Follow: **gesture → basic forms → perspective → anatomy → line art → color → shadows → highlights**.\n6. Select Pencil, Ink, Marker, Airbrush, Eraser, or Fill.\n7. Adjust brush size and opacity.\n8. Enable Grid or Mirror when useful.\n9. Use layers for sketch, line art, flats, shadows, and effects.\n10. Use Undo/Redo while working.\n11. Export the finished drawing as PNG.\n\n## 2. Create an anime character\n1. Open **Generator**.\n2. Select Character, Face, Full Body, Chibi, or Creature.\n3. Select Modern Anime, Shonen, Shojo, Seinen, Chibi, or Manga Ink.\n4. Generate the construction guide.\n5. Start with gesture and large forms.\n6. Build the head, torso, limbs, hands, feet, hair, and clothing.\n7. Refine line art.\n8. Add flat colors.\n9. Add shadows and highlights.\n10. Export the finished image.\n\n## 3. Learn backgrounds and objects\n1. Open **Reference Library**.\n2. Select Buildings, Environments, Vehicles, Props, or Scenes.\n3. Start with the horizon and perspective guides.\n4. Block large geometric forms.\n5. Add secondary forms.\n6. Add anime/manga line details.\n7. Add lighting, atmosphere, and color.\n8. Combine the background with a character or scene.\n\n## 4. Build manga/anime scenes\n1. Open **Manga Panels**.\n2. Add a panel.\n3. Establish camera angle and composition.\n4. Place characters and backgrounds.\n5. Add speech bubbles.\n6. Add speed lines or impact effects.\n7. Add shadows and screen-tone effects.\n8. Review the page as a sequence.\n9. Export the finished page.\n\n## 5. Run the full-stack application locally\n### Requirements\n- Node.js 18+\n- MySQL 8+\n- Git\n\n### Install\n1. Clone the repository.\n2. Change into the project directory.\n3. Run npm install.\n\n### Configure MySQL\n1. Create a MySQL user for the application.\n2. Create the database.\n3. Copy .env.example to .env.\n4. Set DB_HOST, DB_PORT, DB_NAME, DB_USER, and DB_PASSWORD.\n5. Initialize database/schema.sql.\n\n### Start the API\nRun npm start. The API listens on port 3000 by default.\nTest /api/health. A healthy database connection returns ok with database=true.\n\n## 6. Dynamic database workflow\nThe browser never contains MySQL credentials.\n\nBrowser → HTTPS REST API → Node.js/Express → MySQL\n\nThe API handles library searches, users, projects, saved drawing documents, and asset metadata.\n\n## 7. GitHub Pages deployment\n1. Push changes to main.\n2. GitHub Actions runs .github/workflows/pages.yml.\n3. The workflow packages the frontend.\n4. GitHub Pages deploys the static files.\n5. The browser loads the drawing studio from Pages.\n6. Dynamic features call the separately hosted HTTPS API.\n\nGitHub Pages cannot run Node.js or MySQL itself.\n\n## 8. Production architecture\n- GitHub Pages: HTML/CSS/JavaScript frontend\n- Node.js/Express: API and authentication\n- MySQL: persistent application data\n- Object storage: large images and binary assets\n- HTTPS reverse proxy: TLS and API routing\n\nKeep database credentials, API secrets, and server-only configuration outside the frontend.\n\n## 9. Development sequence\n1. Drawing canvas\n2. Brush engine\n3. Layers and history\n4. Anime construction guides\n5. Reference library\n6. Character/background generators\n7. Manga panel tools\n8. Project save/load API\n9. MySQL persistence\n10. Authentication and permissions\n11. Asset storage\n12. Production deployment
+# Anime Studio
 
-## 13. Architecture documentation
-See:
+**Anime Studio** is a browser-based 2D drawing, animation, storyboard, and visual-development environment inspired by professional game-engine editors and raster-art workflows.
+
+It combines an Unreal-style production workspace with anime/cartoon drawing guides, animation frames, manga tools, reusable assets, and a full-stack Node.js + MySQL architecture.
+
+> **Status:** Active prototype / foundation. Some advanced editor systems are planned and are explicitly marked as such.
+
+## Features
+
+### Art & Drawing
+- Pencil, ink, marker, airbrush, eraser, and fill tools
+- Brush size, opacity, color picker, palettes
+- Touch, mouse, and stylus input
+- Undo/redo and PNG export
+- Anime construction guides for faces, eyes, hair, anatomy, hands, feet, and clothing
+
+### Professional Editor Layout
+- Central **Viewport**
+- Left **Tool Dock**
+- **Content Browser**
+- Context-sensitive **Details / Generator** panels
+- **Animation Timeline**
+- **Storyboard** workspace
+- Project → Scene → Shot → Frame → Layer production model
+
+### Animation & Storyboarding
+- Add, duplicate, delete, and select frames
+- FPS control
+- Scene and shot creation
+- Manga panels
+- Speech bubbles
+- Speed-line/action effects
+- Foundation for character sheets, animated shorts, episodes, and movies
+
+### Content Library
+Organized reference and design categories include:
+- Characters and anatomy
+- Hairstyles and expressions
+- Clothing and fabric
+- Creatures and monsters
+- Buildings and architecture
+- Environments
+- Vehicles and mecha
+- Props and technology
+- Scene composition and perspective
+- Manga effects and storyboard elements
+
+The library is designed for original, licensed, public-domain, and user-created resources with provenance and license metadata.
+
+### GIMP-Inspired Editing
+The editor includes an initial non-destructive **Image FX** stack:
+- Grayscale
+- Sepia
+- Invert
+- Brightness
+- Contrast
+- Saturation
+- Blur
+- Enable/disable effects
+- Remove effects
+- Apply active effects during PNG export
+
+Advanced raster features such as true layers, masks, selections, clone/heal, advanced color management, and a plugin API remain roadmap items.
+
+## How to Use
+
+1. Open the application.
+2. Create a project and select its production type.
+3. Use **How to Draw** for construction lessons.
+4. Use **Content Browser** to find guides and reusable assets.
+5. Draw in the central viewport.
+6. Use **Image FX** for non-destructive visual adjustments.
+7. Open **Animation** to create and manage frames.
+8. Use **Storyboard** to organize shots and dialogue.
+9. Export the finished artwork.
+
+## Character Workflow
+
+**Gesture → Construction → Anatomy → Hair/Clothing → Line Art → Flats → Shadows → Highlights → FX → Export**
+
+## Production Workflow
+
+**Project → Scene → Shot → Character/Asset → Frame → Layer → Timeline → Storyboard → Export**
+
+## Full-Stack Architecture
+
+~~~text
+GitHub Pages / Static Frontend
+          │
+          ▼
+     HTTPS REST API
+          │
+          ▼
+   Node.js / Express
+      │          │
+      ▼          ▼
+    MySQL    Object Storage
+~~~
+
+MySQL credentials and server secrets never belong in the browser.
+
+### Requirements
+
+- Node.js 18+
+- MySQL 8+
+- Git
+
+### Local Setup
+
+~~~bash
+git clone https://github.com/ArkansasIo/Drawing-program.git
+cd Drawing-program
+npm install
+cp .env.example .env
+~~~
+
+Configure the database values in .env, initialize database/schema.sql, then run:
+
+~~~bash
+npm start
+~~~
+
+The API defaults to port 3000.
+
+## GitHub Pages
+
+The frontend is deployable through .github/workflows/pages.yml.
+
+GitHub Pages hosts the static editor. The dynamic API and MySQL database must be hosted separately over HTTPS.
+
+## Documentation
+
 - [Requirements](docs/REQUIREMENTS.md)
 - [Project Design](docs/PROJECT_DESIGN.md)
 - [Data Model](docs/DATA_MODEL.md)
 - [UML Architecture](docs/ARCHITECTURE.md)
+- [GIMP Feature Research](docs/GIMP_FEATURE_RESEARCH.md)
+- [Contribution Guide](CONTRIBUTING.md)
+- [Catalog](CATALOG.md)
 
-The editor is organized around a professional dock-based workflow: Viewport, Tool Dock, Content Browser, Details/Inspector, Timeline, and Storyboard.
+## Roadmap
 
-## 14. GIMP-inspired image editing
-The editor now includes an **Image FX** dock with an editable effect stack: grayscale, sepia, invert, brightness, contrast, saturation, and blur. Effects can be toggled or removed and are applied to PNG export while the original canvas pixels remain unchanged. This is a starter non-destructive workflow, not a complete implementation of GIMP's GEGL pipeline.
+### Editor
+- [x] Core drawing canvas
+- [x] Professional dock-style workspace
+- [x] Animation frame timeline
+- [x] Basic image FX stack
+- [ ] True multi-layer raster engine
+- [ ] Layer groups and masks
+- [ ] Selection and transform system
+- [ ] Onion skinning
+- [ ] Keyframes and animation tracks
+- [ ] Audio timeline
 
-See [GIMP Feature Research](docs/GIMP_FEATURE_RESEARCH.md) for feature mapping, official references, anime-oriented presets, and the staged roadmap for layers, masks, selections, transforms, color management, and plugins.
+### Anime Production
+- [x] Construction guides
+- [x] Character/background reference library
+- [x] Manga/storyboard tools
+- [ ] Character rigging
+- [ ] Cel-shading system
+- [ ] Manga screentone engine
+- [ ] Advanced camera system
+- [ ] Render queue
+
+### Platform
+- [x] Static frontend
+- [x] Node/Express API foundation
+- [x] MySQL schema foundation
+- [ ] Authentication
+- [ ] Project cloud storage
+- [ ] Asset upload/storage service
+- [ ] Production API deployment
+
+## License
+
+This project is licensed under the **MIT License**. See [LICENSE](LICENSE).
+
+## Contributing
+
+Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening an issue or pull request.
+
+## Repository
+
+[ArkansasIo/Drawing-program](https://github.com/ArkansasIo/Drawing-program)
