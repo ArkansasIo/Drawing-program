@@ -1,16 +1,21 @@
 # Drawing-program
 
-Anime and manga-oriented drawing studio for browser and desktop use.
+Full-stack anime and manga drawing studio.
 
-## Features
-- Pressure-ready freehand line art canvas
-- Pencil, ink, marker, airbrush, eraser and fill tools
-- Anime/manga palette presets
-- Layer stack with visibility and opacity
-- Undo/redo
-- Grid and symmetry guides
-- Canvas zoom
-- PNG export
-- Touch and pointer input
+## Front end
+HTML + CSS + JavaScript. The drawing editor remains deployable as static files to GitHub Pages.
 
-The first implementation is dependency-free HTML/CSS/JavaScript so it can run from GitHub Pages and be wrapped later as a desktop/mobile application.
+## Back end
+Node.js + Express REST API for health checks, projects, and the dynamic drawing/reference library.
+
+## Database
+MySQL 8+ stores users, projects, drawing documents, library guides, and project assets. JSON columns keep drawing documents and guide data flexible while relational indexes provide fast lookup.
+
+## Run locally
+1. Install Node.js.
+2. Run `npm install`.
+3. Copy `.env.example` to `.env` and configure MySQL.
+4. Run `mysql < database/schema.sql`.
+5. Run `npm start`.
+
+GitHub Pages serves the static frontend. The Node/MySQL service hosts dynamic data. Database credentials must remain server-side and never be placed in browser JavaScript.
