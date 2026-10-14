@@ -264,3 +264,25 @@ document.querySelector("#addVoiceTrack")?.addEventListener("click",()=>{
   voiceState.tracks.push({speaker,script});
   renderVoiceTracks();
 });
+
+/* Lip-sync bridge */
+window.addEventListener("load",()=>{
+  const script=document.querySelector("#voiceScript");
+  const speaker=document.querySelector("#voiceSpeaker");
+  const box=document.querySelector("#voiceTracks");
+  if(!script||!box)return;
+  const renderLipSync=(track)=>{
+    const row=document.createElement("div");row.className="layer-row";
+    const label=document.createElement("span");label.textContent="Lip Sync • "+track.speaker+" • "+track.markers.length+" mouth markers";
+    const pre=document.createElement("code");pre.textContent=track.markers.map(m=>m.viseme+"@"+m.timeMs+"ms").join("  ");
+    row.append(label,pre);box.appendChild(row);
+  };
+  window.generateLipSync=(durationMs=1200)=>{
+    const text=script.value.trim();
+    if(!text||!window.makeLipSyncTrack)return null;
+    const track=window.makeLipSyncTrack(text,durationMs);
+    track.speaker=speaker?.value||"Narrator";
+    renderLipSync(track);
+    return track;
+  };
+});
