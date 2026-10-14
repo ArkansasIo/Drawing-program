@@ -48,6 +48,14 @@ Organized reference and design categories include:
 
 The library is designed for original, licensed, public-domain, and user-created resources with provenance and license metadata.
 
+### Generated Anime Assets
+
+The source generator modules now model editable character and clothing components instead of only flattened images. Character parts include head, eyes, hair, expression, body, hands, clothing, accessories, shadows and highlights. Clothing assets carry material, color, attachment-point and layer metadata.
+
+### Hybrid 2D × 3D Anime Stage
+
+Anime Studio keeps 2D artwork as the source asset while staging it in a real Three.js WebGL scene. The stage supports perspective/orthographic projection, depth cards, camera orbit/zoom, atmospheric fog, ambient/key/rim lighting and dark saturated anime-oriented presentation. Full cel shaders, texture asset import and production rendering remain roadmap items.
+
 ### GIMP-Inspired Editing
 The editor includes an initial non-destructive **Image FX** stack:
 - Grayscale
@@ -162,6 +170,8 @@ GitHub Pages hosts the static editor. The dynamic API and MySQL database must be
 - [x] Construction guides
 - [x] Character/background reference library
 - [x] Manga/storyboard tools
+- [x] Character asset-part generator foundation
+- [x] Live 2D × 3D WebGL stage foundation
 - [ ] Character rigging
 - [ ] Cel-shading system
 - [ ] Manga screentone engine
