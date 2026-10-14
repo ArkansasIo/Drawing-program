@@ -224,3 +224,18 @@ The studio now has a modular runtime under `src/`: animation timeline, asset/pro
 
 ### Core Runtime Additions
 Selection geometry, keyframe interpolation/easing, multitrack audio state, project import/validation, serializable 2.5D stage state, command history, and JSON project export/import helpers are now implemented as dedicated source modules under `src/`.
+
+
+## Source modules added in the production runtime
+
+- `src/studio-runtime.js` — central project/runtime wiring, import/export, camera, stage and UI bindings.
+- `src/animation.js`, `src/keyframes.js`, `src/camera.js` — timeline playback, keyframe interpolation and camera tracks.
+- `src/cel.js`, `src/brushes.js`, `src/selection.js` — cel/layer compositing primitives, brush presets and selection geometry.
+- `src/rig-solver.js`, `src/rigging.js` — bone hierarchy evaluation and two-bone IK math.
+- `src/audio.js`, `src/waveform.js`, `src/lipsync.js` — audio project structure, Web Audio decoding/peaks, and text-estimated viseme markers.
+- `src/assets.js`, `src/importer.js`, `src/serialization.js`, `src/validation.js`, `src/undo.js` — asset metadata, project parsing, JSON export, state validation and command history.
+- `src/export.js`, `src/render.js`, `src/stage-state.js`, `src/stage3d.js` — canvas export helpers, render jobs, 2.5D stage state and Three.js stage.
+
+### Implementation status
+
+This is an actively developed browser-based studio. Project JSON restore/export, basic timeline playback, image asset registration, camera controls, 2.5D stage controls, and the source-module foundation are implemented. Full per-layer cel exposure, frame-specific drawing snapshots, polygon selection interaction, actual selection transforms, waveform editing, phoneme-accurate audio lip-sync, packaged video rendering, and cloud collaboration remain in progress; the UI should not be interpreted as proof that those advanced workflows are complete.
