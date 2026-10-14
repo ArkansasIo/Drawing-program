@@ -1,7 +1,7 @@
 import {SelectionModel} from "./selection.js";
 import {KeyframeTrack} from "./keyframes.js";
 import {AudioProject} from "./audio.js";
-import {readJSON,validateProjectShape} from "./importer.js";
+import {readJSON,validateProjectShape,unwrapProject} from "./importer.js";
 import {validateStudioState} from "./validation.js";
 import {StageState} from "./stage-state.js";
 import {CommandHistory} from "./undo.js";
@@ -13,65 +13,94 @@ import {Rig} from "./rigging.js";
 import {CameraTrack} from "./camera.js";
 import {AnimeProject} from "./project.js";
 import {TOOL_REGISTRY} from "./tools.js";
-import {RenderQueue,RENDER_PRESETS} from "./render.js";
+import {RenderQueue} from "./render.js";
 import {buildGuide,makeCharacterParts,makeClothingSet} from "./generator.js";
 import {makeLipSyncTrack} from "./lipsync.js";
 import {AnimeStage3D} from "./stage3d.js";
+import {decodeAudio} from "./waveform.js";
 
-const runtime={project:new AnimeProject(),timeline:new AnimationTimeline(),assets:new AssetManager(),storyboard:new Storyboard(),rig:new Rig(),camera:new CameraTrack(),render:new RenderQueue(),tools:TOOL_REGISTRY,selection:new SelectionModel(),audio:new AudioProject(),stage:new StageState(),history:new CommandHistory()};
+const runtime={project:new AnimeProject(),timeline:new AnimationTimeline(),assets:new AssetManager(),storyboard:new Storyboard(),rig:new Rig(),camera:new CameraTrack(),render:new RenderQueue(),tools:TOOL_REGISTRY,selection:new SelectionModel(),audio:new AudioProject(),stage:new StageState(),history:new CommandHistory(),tracks:{}};
 window.animeStudio=runtime;
 
-function out(title,text){const e=document.querySelector("#genout");if(e)e.textContent=title+"\n\n"+text}
-function panel(id){document.querySelectorAll(".panel").forEach(x=>x.classList.remove("active"));document.querySelector("#"+id)?.classList.add("active")}
+const $=s=>document.querySelector(s);
+const out=(title,text)=>{const e=$("#genout");if(e)e.textContent=title+"\n\n"+text};
+const setText=(id,text)=>{const e=$("#"+id);if(e)e.textContent=text};
+const panel=id=>{document.querySelectorAll(".panel").forEach(x=>x.classList.remove("active"));$("#"+id)?.classList.add("active")};
 
-runtime.timeline.subscribe(t=>{const s=document.querySelector("#frameStatus");if(s)s.textContent=`Frame ${t.current+1} / ${t.frames.length} • ${t.fps} FPS • Onion ${t.onion?"ON":"OFF"}`});
-document.querySelector("#fps")?.addEventListener("input",e=>runtime.timeline.setFPS(e.target.value));
-document.querySelector("#addFrame")?.addEventListener("click",()=>runtime.timeline.addFrame());
-document.querySelector("#duplicateFrame")?.addEventListener("click",()=>runtime.timeline.addFrame(true));
-document.querySelector("#deleteFrame")?.addEventListener("click",()=>runtime.timeline.deleteFrame());
-document.querySelector("#onionSkin")?.addEventListener("click",()=>runtime.timeline.toggleOnion());
+function snapshot(){
+  return {project:JSON.parse(runtime.project.serialize()),timeline:runtime.timeline.toJSON(),storyboard:runtime.storyboard.toJSON(),rig:runtime.rig.toJSON(),camera:runtime.camera.toJSON(),assets:runtime.assets.items,audio:runtime.audio.toJSON(),stage:runtime.stage.toJSON(),tracks:Object.fromEntries(Object.entries(runtime.tracks).map(([k,v])=>[k,v.toJSON()]))};
+}
+function restore(data){
+  const p=unwrapProject(data);runtime.project.version=p.version||1;runtime.project.name=p.name||"Untitled Anime Project";runtime.project.scenes=Array.isArray(p.scenes)?p.scenes:[];runtime.project.settings=p.settings||runtime.project.settings;runtime.project.modifiedAt=p.modifiedAt||Date.now();
+  runtime.timeline.fromJSON(data.timeline||{});runtime.storyboard.panels=data.storyboard?.panels||[];runtime.storyboard.current=Math.max(0,Math.min(runtime.storyboard.panels.length-1,data.storyboard?.current||0));
+  runtime.rig.bones=data.rig?.bones||[];runtime.rig.controls=data.rig?.controls||[];runtime.rig.actions=data.rig?.actions||[];runtime.rig.name=data.rig?.name||"Character Rig";
+  runtime.camera.fromJSON(data.camera||{});runtime.assets.fromJSON(data.assets||[]);runtime.audio.tracks=data.audio?.tracks||[];runtime.audio.master=data.audio?.master??1;runtime.stage.fromJSON(data.stage||{});
+  runtime.tracks={};Object.entries(data.tracks||{}).forEach(([k,v])=>{const t=new KeyframeTrack(v.property||k);t.keys=v.keys||[];runtime.tracks[k]=t});
+  renderTimeline();renderAssets();renderRig();renderStage();setText("masterVolume",Math.round(runtime.audio.master*100));setText("renderStatus","Project restored.");
+  runtime.project.touch();
+}
 
-document.querySelector("#newScene")?.addEventListener("click",()=>{const s=runtime.project.addScene("Scene "+(runtime.project.scenes.length+1));out("NEW SCENE",s.id);});
-document.querySelector("#newShot")?.addEventListener("click",()=>{const s=runtime.project.scenes.at(-1)||runtime.project.addScene("Scene 1");const sh=runtime.project.addShot(s.id,{shotNumber:s.shots.length+1});out("NEW SHOT",JSON.stringify(sh,null,2));});
+function renderTimeline(){
+  const box=$("#timeline");if(box){box.innerHTML="";runtime.timeline.frames.forEach((_,i)=>{const b=document.createElement("button");b.textContent=String(i+1);b.className=i===runtime.timeline.current?"active":"";b.onclick=()=>runtime.timeline.select(i);box.appendChild(b)})}
+  setText("frameStatus",`Frame ${runtime.timeline.current+1} / ${runtime.timeline.frames.length} • ${runtime.timeline.fps} FPS • Onion ${runtime.timeline.onion?"ON":"OFF"}`);
+}
+runtime.timeline.subscribe(renderTimeline);
+$("#fps")?.addEventListener("input",e=>runtime.timeline.setFPS(e.target.value));
+$("#addFrame")?.addEventListener("click",()=>runtime.timeline.addFrame(false));
+$("#duplicateFrame")?.addEventListener("click",()=>runtime.timeline.addFrame(true));
+$("#deleteFrame")?.addEventListener("click",()=>runtime.timeline.deleteFrame());
+$("#onionSkin")?.addEventListener("click",()=>runtime.timeline.toggleOnion());
+$("#playAnimation")?.addEventListener("click",()=>runtime.timeline.togglePlayback());
+$("#prevFrame")?.addEventListener("click",()=>runtime.timeline.previous());
+$("#nextFrame")?.addEventListener("click",()=>runtime.timeline.next());
 
-document.querySelector("#addPanel")?.addEventListener("click",()=>{const p=runtime.storyboard.add();out("STORYBOARD PANEL",JSON.stringify(p,null,2));});
-document.querySelector("#speech")?.addEventListener("click",()=>out("SPEECH BUBBLE","Dialogue element created for the current storyboard shot."));
-document.querySelector("#speed")?.addEventListener("click",()=>out("SPEED LINES","Action-line FX element created for the current shot."));
+$("#newScene")?.addEventListener("click",()=>{const s=runtime.project.addScene("Scene "+(runtime.project.scenes.length+1));out("NEW SCENE",JSON.stringify(s,null,2))});
+$("#newShot")?.addEventListener("click",()=>{const s=runtime.project.scenes.at(-1)||runtime.project.addScene("Scene 1");out("NEW SHOT",JSON.stringify(runtime.project.addShot(s.id,{shotNumber:s.shots.length+1}),null,2))});
+$("#addPanel")?.addEventListener("click",()=>out("STORYBOARD PANEL",JSON.stringify(runtime.storyboard.add(),null,2)));
 
-function renderRig(){const box=document.querySelector("#rigList");if(!box)return;box.innerHTML=[...runtime.rig.bones.map(x=>["Bone",x.name]),...runtime.rig.controls.map(x=>["IK",x.name]),...runtime.rig.actions.map(x=>["Action",x.name])].map(x=>`<div class="layer-row"><span>${x[0]} • ${x[1]}</span></div>`).join("")}
-document.querySelector("#addBone")?.addEventListener("click",()=>{runtime.rig.addBone();renderRig()});
-document.querySelector("#addIK")?.addEventListener("click",()=>{runtime.rig.addIK();renderRig()});
-document.querySelector("#addRigAction")?.addEventListener("click",()=>{runtime.rig.addAction();renderRig()});
+function renderRig(){const box=$("#rigList");if(!box)return;box.innerHTML=[...runtime.rig.bones.map(x=>["Bone",x.name]),...runtime.rig.controls.map(x=>["IK",x.name]),...runtime.rig.actions.map(x=>["Action",x.name])].map(([a,b])=>`<div class="layer-row"><span>${a} • ${b}</span></div>`).join("")}
+$("#addBone")?.addEventListener("click",()=>{runtime.rig.addBone({parent:runtime.rig.bones.at(-1)?.id||null});renderRig()});
+$("#addIK")?.addEventListener("click",()=>{runtime.rig.addIK({chain:runtime.rig.bones.slice(-2).map(x=>x.id)});renderRig()});
+$("#addRigAction")?.addEventListener("click",()=>{runtime.rig.addAction();renderRig()});
 
-document.querySelector("#cameraReset")?.addEventListener("click",()=>{runtime.camera.set(0,0,1,0);document.querySelector("#cameraZoom").value=100;document.querySelector("#cameraRotation").value=0});
-document.querySelector("#cameraZoom")?.addEventListener("input",e=>runtime.camera.zoom=+e.target.value/100);
-document.querySelector("#cameraRotation")?.addEventListener("input",e=>runtime.camera.rotation=+e.target.value);
-document.querySelector("#cameraBookmark")?.addEventListener("click",()=>{runtime.camera.bookmark();const b=document.querySelector("#cameraList");if(b)b.textContent=runtime.camera.bookmarks.map((x,i)=>`Bookmark ${i+1} • ${Math.round(x.zoom*100)}% • ${x.rotation}°`).join("\n")});
+function applyCamera(){const c=runtime.camera;const canvas=$("#canvas");if(canvas)canvas.style.transform=`scale(${c.zoom}) rotate(${c.rotation}deg)`;const stage=window.animeStage3D;if(stage&&stage.activeCamera){stage.activeCamera.position.x=c.x;stage.activeCamera.position.y=c.y;stage.activeCamera.position.z=Math.max(3,10/c.zoom)}}
+$("#cameraReset")?.addEventListener("click",()=>{runtime.camera.set(0,0,1,0);$("#cameraZoom").value=100;$("#cameraRotation").value=0;applyCamera()});
+$("#cameraZoom")?.addEventListener("input",e=>{runtime.camera.zoom=+e.target.value/100;applyCamera()});
+$("#cameraRotation")?.addEventListener("input",e=>{runtime.camera.rotation=+e.target.value;applyCamera()});
+$("#cameraBookmark")?.addEventListener("click",()=>{runtime.camera.bookmark();renderCameraList()});
+$("#cameraKeyframe")?.addEventListener("click",()=>{runtime.camera.keyframe(runtime.timeline.current);renderCameraList()});
+function renderCameraList(){const e=$("#cameraList");if(e)e.textContent=[...runtime.camera.bookmarks.map((x,i)=>`Bookmark ${i+1} • ${Math.round(x.zoom*100)}% • ${x.rotation}°`),...runtime.camera.keyframes.map(x=>`Keyframe ${x.time}`)].join("\n")}
 
-function renderAssets(){const box=document.querySelector("#assetLibrary");if(!box)return;const q=document.querySelector("#assetSearch")?.value||"";box.innerHTML="";runtime.assets.search(q).forEach(a=>{const b=document.createElement("button");b.textContent=a.name;b.title=`${a.category} • ${a.license}`;b.onclick=()=>out("ASSET",JSON.stringify(a,null,2));box.appendChild(b)})}
-["Anime Character Base","Face Construction Sheet","Eyes & Expressions","Hair Silhouette Pack","School Uniform","Fantasy Armor","Japanese House","City Background","Forest Background","Mecha Parts","Magic FX","Speed Lines","Impact FX","Pose Reference"].forEach((name,i)=>runtime.assets.add({name,category:["Characters","Poses","Expressions","Clothing","Clothing","Creatures","Backgrounds","Backgrounds","Backgrounds","Vehicles","FX","FX","FX","Poses"][i]||"Characters",tags:name.toLowerCase().split(" "),source:"built-in catalog",license:"Original placeholder"}));
-document.querySelector("#assetSearch")?.addEventListener("input",renderAssets);document.querySelector("#assetCategory")?.addEventListener("change",e=>{runtime.assets.filters.category=e.target.value;renderAssets()});renderAssets();
+function renderAssets(){const box=$("#assetLibrary");if(!box)return;const q=$("#assetSearch")?.value||"";box.innerHTML="";runtime.assets.search(q).forEach(a=>{const b=document.createElement("button");b.textContent=a.name;b.title=`${a.category} • ${a.license}`;b.onclick=()=>out("ASSET",JSON.stringify(a,null,2));box.appendChild(b)})}
+$("#assetSearch")?.addEventListener("input",renderAssets);$("#assetCategory")?.addEventListener("change",e=>{runtime.assets.filters.category=e.target.value;renderAssets()});
+$("#assetImport")?.addEventListener("change",e=>{[...e.target.files].forEach(f=>{const a=runtime.assets.importFile(f,{category:$("#assetCategory")?.value||"Characters"});out("ASSET IMPORTED",JSON.stringify({name:a.name,size:a.size,type:a.mime},null,2))});renderAssets()});
+function renderStage(){const s=runtime.stage;const mode=$("#stageMode"),proj=$("#projection");if(mode)mode.value=s.mode==="2.5D Stage"?"2.5D Stage":s.mode;if(proj)proj.value=s.projection;if($("#assetDepth"))$("#assetDepth").value=s.depth;if($("#parallax"))$("#parallax").value=Math.round(s.parallax*100);if($("#stageLight"))$("#stageLight").value=Math.round(s.light*100);const host=window.animeStage3D;if(host){host.setProjection(s.projection);host.setLighting(s.light);host.setDepth(s.depth)}const box=$("#stageCards");if(box)box.innerHTML=s.cards.map(x=>`<div class="layer-row"><span>${x.name} • Z ${x.z}</span></div>`).join("")}
+["stageMode","projection","assetDepth","parallax","stageLight"].forEach(id=>$("#"+id)?.addEventListener("input",()=>{runtime.stage.mode=$("#stageMode")?.value||runtime.stage.mode;runtime.stage.projection=$("#projection")?.value||runtime.stage.projection;runtime.stage.depth=+($("#assetDepth")?.value||0);runtime.stage.parallax=(+($("#parallax")?.value||100))/100;runtime.stage.light=(+($("#stageLight")?.value||70))/100;renderStage()}));
+$("#addStageCard")?.addEventListener("click",()=>{const c=runtime.stage.addCard();window.animeStage3D?.addCard({name:c.name,z:c.z,parallax:c.parallax});renderStage()});
+$("#resetStage")?.addEventListener("click",()=>{runtime.stage.reset();window.animeStage3D?.clearCards();renderStage()});
 
-document.querySelector("#renderExport")?.addEventListener("click",()=>{const job=runtime.render.add({preset:"custom",format:document.querySelector("#renderFormat").value,scale:+document.querySelector("#renderScale").value,frame:runtime.timeline.current});runtime.render.start(job.id);const c=document.querySelector("#canvas");const a=document.createElement("a");a.download="anime-studio-frame.png";a.href=c.toDataURL("image/png");a.click();runtime.render.complete(job.id);document.querySelector("#renderStatus").textContent="Render job "+job.id+" complete."});
-document.querySelector("#renderSequence")?.addEventListener("click",()=>{const job=runtime.render.add({preset:"anime",frames:runtime.timeline.frames.length});document.querySelector("#renderStatus").textContent="Queued "+job.id+" • "+job.frames+" frames."});
-document.querySelector("#export")?.addEventListener("click",()=>document.querySelector("#renderExport")?.click());
+$("#generate")?.addEventListener("click",()=>out("ANIME GUIDE",JSON.stringify(buildGuide($("#subject").value,$("#style").value),null,2)));
+$("#generateCharacter")?.addEventListener("click",()=>out("CHARACTER PARTS",JSON.stringify(makeCharacterParts({style:$("#style").value}),null,2)));
+$("#generateClothing")?.addEventListener("click",()=>out("CLOTHING SET",JSON.stringify(makeClothingSet("fantasy jacket",$("#style").value),null,2)));
+$("#addVoiceTrack")?.addEventListener("click",()=>{const text=$("#voiceScript")?.value.trim();if(!text)return;const track=makeLipSyncTrack(text,1200);out("DIALOGUE + LIP SYNC",JSON.stringify({speaker:$("#voiceSpeaker")?.value||"Narrator",markers:track.markers},null,2))});
 
-document.querySelector("#generate")?.addEventListener("click",()=>{const g=buildGuide(document.querySelector("#subject").value,document.querySelector("#style").value);out("ANIME GUIDE",JSON.stringify(g,null,2))});
-document.querySelector("#generateCharacter")?.addEventListener("click",()=>out("CHARACTER PARTS",JSON.stringify(makeCharacterParts({style:document.querySelector("#style").value}),null,2)));
-document.querySelector("#generateClothing")?.addEventListener("click",()=>out("CLOTHING SET",JSON.stringify(makeClothingSet("fantasy jacket",document.querySelector("#style").value),null,2)));
+$("#selectionClear")?.addEventListener("click",()=>{runtime.selection.clear();setText("transformStatus","Selection cleared.")});
+["selectionRect","selectionFree"].forEach(id=>$("#"+id)?.addEventListener("click",()=>{runtime.selection.type=id==="selectionRect"?"rectangle":"polygon";setText("transformStatus",`Selection mode: ${runtime.selection.type}`)}));
 
-document.querySelector("#addVoiceTrack")?.addEventListener("click",()=>{const text=document.querySelector("#voiceScript")?.value.trim();if(!text)return;const track=makeLipSyncTrack(text,1200);out("DIALOGUE + LIP SYNC",JSON.stringify({speaker:document.querySelector("#voiceSpeaker")?.value||"Narrator",markers:track.markers},null,2))});
+$("#renderExport")?.addEventListener("click",async()=>{const canvas=$("#canvas"),fmt=($("#renderFormat")?.value||"PNG").toLowerCase(),scale=+($("#renderScale")?.value||1);const mime=fmt==="jpeg"?"image/jpeg":fmt==="webp"?"image/webp":"image/png";const outCanvas=document.createElement("canvas");outCanvas.width=canvas.width*scale;outCanvas.height=canvas.height*scale;const c=outCanvas.getContext("2d");c.drawImage(canvas,0,0,outCanvas.width,outCanvas.height);const a=document.createElement("a");a.download=`anime-studio-frame-${runtime.timeline.current+1}.${mime==="image/jpeg"?"jpg":mime==="image/webp"?"webp":"png"}`;a.href=outCanvas.toDataURL(mime,.92);a.click();runtime.render.add({format:fmt,scale,frame:runtime.timeline.current,status:"complete"});setText("renderStatus",`Exported ${fmt} at ${scale}×.`)});
 
-const stageHost=document.querySelector("#stage3dViewport");if(stageHost&&!window.animeStage3D){try{window.animeStage3D=new AnimeStage3D(stageHost)}catch(e){console.warn("3D stage unavailable",e)}}
-window.saveAnimeProject=()=>{runtime.project.saveLocal();return runtime.project.serialize({timeline:runtime.timeline.toJSON(),storyboard:runtime.storyboard.toJSON(),rig:runtime.rig.toJSON(),camera:runtime.camera.toJSON(),assets:runtime.assets.items})};
-window.getAnimeStudioToolRegistry=()=>runtime.tools;
+window.saveAnimeProject=()=>{const data=snapshot();localStorage.setItem("anime-studio-project",JSON.stringify(data));return data};
+window.loadAnimeProject=()=>{const raw=localStorage.getItem("anime-studio-project");if(!raw)return null;const data=JSON.parse(raw);restore(data);return data};
 window.validateAnimeStudio=()=>validateStudioState({project:runtime.project,timeline:runtime.timeline,assets:runtime.assets.items,rig:runtime.rig.toJSON()});
-window.exportAnimeStudioProject=()=>{const data={project:JSON.parse(runtime.project.serialize()),timeline:runtime.timeline.toJSON(),storyboard:runtime.storyboard.toJSON(),rig:runtime.rig.toJSON(),camera:runtime.camera.toJSON(),assets:runtime.assets.items,audio:runtime.audio.toJSON(),stage:runtime.stage.toJSON()};downloadJSON(projectFilename(runtime.project.name),data);return data};
-window.addStudioKeyframe=(property,time,value,easing="linear")=>{const t=runtime[property]||new KeyframeTrack(property);if(!runtime[property])runtime[property]=t;return t.add(time,value,easing)};
-window.getStudioKeyframe=(property,time)=>runtime[property]?.evaluate(time)??null;
+window.exportAnimeStudioProject=()=>{const data=snapshot();downloadJSON(projectFilename(runtime.project.name),data);return data};
+window.addStudioKeyframe=(property,time,value,easing="linear")=>{const t=runtime.tracks[property]||(runtime.tracks[property]=new KeyframeTrack(property));return t.add(time,value,easing)};
+window.getStudioKeyframe=(property,time)=>runtime.tracks[property]?.evaluate(time)??null;
 
-document.querySelector("#selectionClear")?.addEventListener("click",()=>{runtime.selection.clear();const s=document.querySelector("#transformStatus");if(s)s.textContent="Selection cleared."});
-document.querySelector("#cameraKeyframe")?.addEventListener("click",()=>{runtime.camera.keyframe(runtime.timeline.current);const e=document.querySelector("#cameraList");if(e)e.textContent+="\nKeyframe "+runtime.timeline.current});
-document.querySelector("#exportProject")?.addEventListener("click",()=>window.exportAnimeStudioProject());
-document.querySelector("#importProject")?.addEventListener("change",async e=>{const file=e.target.files?.[0];if(!file)return;try{const data=await readJSON(file);if(!validateProjectShape(data))throw new Error("Invalid Anime Studio project file");window.animeStudioImportedProject=data;out("PROJECT IMPORTED",JSON.stringify({name:data.name,scenes:data.scenes.length,version:data.version},null,2))}catch(err){out("PROJECT IMPORT ERROR",err.message)}});
-document.querySelector("#masterVolume")?.addEventListener("input",e=>runtime.audio.setMaster(+e.target.value/100));
+$("#exportProject")?.addEventListener("click",()=>window.exportAnimeStudioProject());
+$("#importProject")?.addEventListener("change",async e=>{const file=e.target.files?.[0];if(!file)return;try{const data=await readJSON(file);if(!validateProjectShape(data))throw new Error("Invalid Anime Studio project file");restore(data);window.animeStudioImportedProject=data;out("PROJECT IMPORTED",JSON.stringify({name:unwrapProject(data).name,scenes:unwrapProject(data).scenes.length,version:unwrapProject(data).version},null,2))}catch(err){out("PROJECT IMPORT ERROR",err.message)}});
+$("#masterVolume")?.addEventListener("input",e=>runtime.audio.setMaster(+e.target.value/100));
+$("#audioImport")?.addEventListener("change",async e=>{for(const file of e.target.files||[]){try{const meta=await decodeAudio(file);runtime.audio.addTrack(file.name).clips.push({source:file.name,duration:meta.duration,type:file.type})}catch{runtime.audio.addTrack(file.name)}}out("AUDIO IMPORTED",`${e.target.files?.length||0} file(s)`)});
+
+const stageHost=$("#stage3dViewport");if(stageHost&&!window.animeStage3D){try{window.animeStage3D=new AnimeStage3D(stageHost);renderStage();applyCamera()}catch(e){console.warn("3D stage unavailable",e)}}
+renderAssets();renderRig();renderCameraList();
+try{if(localStorage.getItem("anime-studio-project"))window.loadAnimeProject()}catch(e){console.warn("Autosave restore failed",e)}
