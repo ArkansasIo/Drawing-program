@@ -248,12 +248,19 @@ document.querySelector("#voiceRecord")?.addEventListener("click",async()=>{
 document.querySelector("#voiceStopRecord")?.addEventListener("click",()=>{
   if(voiceState.recorder?.state==="recording")voiceState.recorder.stop();
 });
+function renderVoiceTracks(){
+  const box=document.querySelector("#voiceTracks");if(!box)return;
+  box.innerHTML="";
+  voiceState.tracks.forEach((x,i)=>{
+    const row=document.createElement("div");row.className="layer-row";
+    const label=document.createElement("span");label.textContent="Dialogue "+(i+1)+" • "+x.speaker;
+    const del=document.createElement("button");del.textContent="×";del.onclick=()=>{voiceState.tracks.splice(i,1);renderVoiceTracks()};
+    row.append(label,del);box.appendChild(row);
+  });
+}
 document.querySelector("#addVoiceTrack")?.addEventListener("click",()=>{
   const speaker=document.querySelector("#voiceSpeaker")?.value||"Narrator";
   const script=document.querySelector("#voiceScript")?.value.trim()||"Untitled dialogue";
   voiceState.tracks.push({speaker,script});
-  const box=document.querySelector("#voiceTracks");if(box){
-    box.innerHTML=voiceState.tracks.map((x,i)=>"<div class='layer-row'><span>Dialogue "+(i+1)+" • "+x.speaker+"</span><button data-vt='"+i+"'>×</button></div>").join("");
-    box.querySelectorAll("[data-vt]").forEach(b=>b.onclick=()=>{voiceState.tracks.splice(+b.dataset.vt,1);document.querySelector("#addVoiceTrack").click();voiceState.tracks.pop()});
-  }
+  renderVoiceTracks();
 });
