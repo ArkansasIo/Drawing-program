@@ -56,11 +56,11 @@ jobs:
           test -f src/stage-state.js
           test -f src/undo.js
           test -f src/serialization.js
-          src/cel.js
-          src/brushes.js
-          src/rig-solver.js
-          src/waveform.js
-          src/export.js
+          test -f src/cel.js
+          test -f src/brushes.js
+          test -f src/rig-solver.js
+          test -f src/waveform.js
+          test -f src/export.js
       - name: Upload Anime Studio
         uses: actions/upload-pages-artifact@v3
         with:
