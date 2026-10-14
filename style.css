@@ -13,3 +13,9 @@
 .generator-parts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
 .generator-parts button{font-size:11px}
 @media(max-width:900px){#stage3dViewport{min-height:220px}}
+
+/* Voice-over workspace */
+#voiceover textarea{width:100%;box-sizing:border-box;background:#11151d;color:var(--text);border:1px solid var(--line);border-radius:5px;padding:8px;resize:vertical;font:inherit}
+#voiceover audio{max-width:150px;height:30px}
+.audio-row{display:flex;align-items:center;gap:7px;padding:6px;border-bottom:1px solid var(--line)}
+.audio-row span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
