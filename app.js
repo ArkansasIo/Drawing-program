@@ -188,3 +188,72 @@ function syncStage(){stage.mode=document.querySelector("#stageMode")?.value||sta
 document.querySelector("#addStageCard")?.addEventListener("click",()=>{stage.cards.push({name:"2D Card "+(stage.cards.length+1),z:stage.depth,parallax:stage.parallax});renderStageCards()});
 document.querySelector("#resetStage")?.addEventListener("click",()=>{stage.mode="2D Canvas";stage.projection="Perspective";stage.depth=0;stage.parallax=1;stage.light=.7;stage.cards=[];["stageMode","projection"].forEach(id=>document.querySelector("#"+id).selectedIndex=0);document.querySelector("#assetDepth").value=0;document.querySelector("#parallax").value=100;document.querySelector("#stageLight").value=70;renderStageCards();syncStage()});
 syncStage();renderStageCards();
+
+
+/* Voice Over workspace */
+const voiceState={voices:[],takes:[],tracks:[],recorder:null,stream:null,chunks:[]};
+function renderVoiceVoices(){
+  const select=document.querySelector("#voiceSelect");if(!select)return;
+  const current=select.value;
+  select.innerHTML='<option value="">System default</option>';
+  voiceState.voices.forEach((v,i)=>{const o=document.createElement("option");o.value=String(i);o.textContent=v.name+" — "+v.lang;select.appendChild(o)});
+  if([...select.options].some(o=>o.value===current))select.value=current;
+}
+function loadVoices(){voiceState.voices=speechSynthesis.getVoices();renderVoiceVoices()}
+if("speechSynthesis" in window){loadVoices();speechSynthesis.onvoiceschanged=loadVoices}
+function voiceStatus(t){const el=document.querySelector("#voiceStatus");if(el)el.textContent=t}
+document.querySelector("#voicePreview")?.addEventListener("click",()=>{
+  if(!("speechSynthesis" in window)){voiceStatus("Speech synthesis is not available in this browser.");return}
+  speechSynthesis.cancel();
+  const text=document.querySelector("#voiceScript")?.value.trim();
+  if(!text){voiceStatus("Enter dialogue or narration first.");return}
+  const u=new SpeechSynthesisUtterance(text);
+  const idx=document.querySelector("#voiceSelect")?.value;
+  if(idx!=="")u.voice=voiceState.voices[+idx];
+  u.rate=+(document.querySelector("#voiceRate")?.value||1);
+  u.pitch=+(document.querySelector("#voicePitch")?.value||1);
+  u.onstart=()=>voiceStatus("Previewing voice-over…");
+  u.onend=()=>voiceStatus("Voice preview finished.");
+  speechSynthesis.speak(u);
+});
+document.querySelector("#voiceStop")?.addEventListener("click",()=>{speechSynthesis?.cancel();voiceStatus("Voice preview stopped.")});
+
+function renderVoiceTakes(){
+  const box=document.querySelector("#voiceTakes");if(!box)return;box.innerHTML="";
+  voiceState.takes.forEach((take,i)=>{
+    const row=document.createElement("div");row.className="audio-row";
+    const label=document.createElement("span");label.textContent=(take.speaker||"Narrator")+" • Take "+(i+1);
+    const audio=document.createElement("audio");audio.controls=true;audio.src=take.url;
+    const del=document.createElement("button");del.textContent="×";del.onclick=()=>{URL.revokeObjectURL(take.url);voiceState.takes.splice(i,1);renderVoiceTakes()};
+    row.append(label,audio,del);box.appendChild(row);
+  });
+}
+document.querySelector("#voiceRecord")?.addEventListener("click",async()=>{
+  if(!navigator.mediaDevices?.getUserMedia){voiceStatus("Microphone recording is not supported here.");return}
+  try{
+    voiceState.stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    voiceState.chunks=[];
+    voiceState.recorder=new MediaRecorder(voiceState.stream);
+    voiceState.recorder.ondataavailable=e=>{if(e.data.size)voiceState.chunks.push(e.data)};
+    voiceState.recorder.onstop=()=>{
+      const blob=new Blob(voiceState.chunks,{type:voiceState.recorder.mimeType||"audio/webm"});
+      voiceState.takes.push({speaker:document.querySelector("#voiceSpeaker")?.value||"Narrator",script:document.querySelector("#voiceScript")?.value||"",url:URL.createObjectURL(blob),blob});
+      voiceState.stream.getTracks().forEach(t=>t.stop());voiceState.stream=null;renderVoiceTakes();voiceStatus("Recorded take "+voiceState.takes.length+".");
+      const r=document.querySelector("#voiceRecord"),s=document.querySelector("#voiceStopRecord");if(r)r.disabled=false;if(s)s.disabled=true;
+    };
+    voiceState.recorder.start();
+    document.querySelector("#voiceRecord").disabled=true;document.querySelector("#voiceStopRecord").disabled=false;voiceStatus("Recording microphone…");
+  }catch(e){voiceStatus("Microphone permission or recording failed.");}
+});
+document.querySelector("#voiceStopRecord")?.addEventListener("click",()=>{
+  if(voiceState.recorder?.state==="recording")voiceState.recorder.stop();
+});
+document.querySelector("#addVoiceTrack")?.addEventListener("click",()=>{
+  const speaker=document.querySelector("#voiceSpeaker")?.value||"Narrator";
+  const script=document.querySelector("#voiceScript")?.value.trim()||"Untitled dialogue";
+  voiceState.tracks.push({speaker,script});
+  const box=document.querySelector("#voiceTracks");if(box){
+    box.innerHTML=voiceState.tracks.map((x,i)=>"<div class='layer-row'><span>Dialogue "+(i+1)+" • "+x.speaker+"</span><button data-vt='"+i+"'>×</button></div>").join("");
+    box.querySelectorAll("[data-vt]").forEach(b=>b.onclick=()=>{voiceState.tracks.splice(+b.dataset.vt,1);document.querySelector("#addVoiceTrack").click();voiceState.tracks.pop()});
+  }
+});
