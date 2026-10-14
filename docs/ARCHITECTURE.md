@@ -87,3 +87,19 @@ flowchart TD
   VIEW --> PROJECT[Project]
   PROJECT --> EXPORT[PNG / Animation / Comic Export]
 ```
+
+
+## Image Effects Sequence
+```mermaid
+sequenceDiagram
+  participant Artist
+  participant FX as Effect Stack
+  participant View as Viewport Preview
+  participant Export as PNG Export
+  Artist->>FX: Add effect and parameters
+  FX->>View: Update live CSS preview
+  Artist->>FX: Toggle or remove effect
+  Artist->>Export: Export current image
+  Export->>Export: Render original pixels with active effects
+  Export-->>Artist: PNG file
+```
