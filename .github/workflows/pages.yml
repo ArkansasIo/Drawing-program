@@ -1,4 +1,4 @@
-name: Deploy Drawing Program to GitHub Pages
+name: Deploy Anime Studio to GitHub Pages
 
 on:
   push:
@@ -7,6 +7,10 @@ on:
       - 'index.html'
       - 'style.css'
       - 'app.js'
+      - 'src/**'
+      - 'assets/**'
+      - 'docs/**'
+      - 'package.json'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -27,7 +31,14 @@ jobs:
         uses: actions/checkout@v4
       - name: Configure Pages
         uses: actions/configure-pages@v5
-      - name: Upload drawing studio
+      - name: Validate static modules
+        run: |
+          test -f index.html
+          test -f app.js
+          test -f src/generator.js
+          test -f src/stage3d.js
+          test -f src/studio-init.js
+      - name: Upload Anime Studio
         uses: actions/upload-pages-artifact@v3
         with:
           path: './'
