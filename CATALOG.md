@@ -84,3 +84,12 @@ Composition; perspective; lighting; weather; day/night; action scenes; backgroun
 - UML architecture
 - GIMP feature research
 - Contribution guide
+
+## Newly Added Editor Systems
+- Layer dock with active-layer selection
+- New, duplicate, and delete layer controls
+- Rectangle and free-selection modes
+- Move, rotate, scale transform modes
+- Horizontal flip command
+- Onion-skin workspace control
+- Expanded tool picker with color-picking tool
