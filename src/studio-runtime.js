@@ -1,3 +1,11 @@
+import {SelectionModel} from "./selection.js";
+import {KeyframeTrack} from "./keyframes.js";
+import {AudioProject} from "./audio.js";
+import {readJSON,validateProjectShape} from "./importer.js";
+import {validateStudioState} from "./validation.js";
+import {StageState} from "./stage-state.js";
+import {CommandHistory} from "./undo.js";
+import {downloadJSON,projectFilename} from "./serialization.js";
 import {AnimationTimeline} from "./animation.js";
 import {AssetManager} from "./assets.js";
 import {Storyboard} from "./storyboard.js";
@@ -10,7 +18,7 @@ import {buildGuide,makeCharacterParts,makeClothingSet} from "./generator.js";
 import {makeLipSyncTrack} from "./lipsync.js";
 import {AnimeStage3D} from "./stage3d.js";
 
-const runtime={project:new AnimeProject(),timeline:new AnimationTimeline(),assets:new AssetManager(),storyboard:new Storyboard(),rig:new Rig(),camera:new CameraTrack(),render:new RenderQueue(),tools:TOOL_REGISTRY};
+const runtime={project:new AnimeProject(),timeline:new AnimationTimeline(),assets:new AssetManager(),storyboard:new Storyboard(),rig:new Rig(),camera:new CameraTrack(),render:new RenderQueue(),tools:TOOL_REGISTRY,selection:new SelectionModel(),audio:new AudioProject(),stage:new StageState(),history:new CommandHistory()};
 window.animeStudio=runtime;
 
 function out(title,text){const e=document.querySelector("#genout");if(e)e.textContent=title+"\n\n"+text}
@@ -57,3 +65,7 @@ document.querySelector("#addVoiceTrack")?.addEventListener("click",()=>{const te
 const stageHost=document.querySelector("#stage3dViewport");if(stageHost&&!window.animeStage3D){try{window.animeStage3D=new AnimeStage3D(stageHost)}catch(e){console.warn("3D stage unavailable",e)}}
 window.saveAnimeProject=()=>{runtime.project.saveLocal();return runtime.project.serialize({timeline:runtime.timeline.toJSON(),storyboard:runtime.storyboard.toJSON(),rig:runtime.rig.toJSON(),camera:runtime.camera.toJSON(),assets:runtime.assets.items})};
 window.getAnimeStudioToolRegistry=()=>runtime.tools;
+window.validateAnimeStudio=()=>validateStudioState({project:runtime.project,timeline:runtime.timeline,assets:runtime.assets.items,rig:runtime.rig.toJSON()});
+window.exportAnimeStudioProject=()=>{const data={project:JSON.parse(runtime.project.serialize()),timeline:runtime.timeline.toJSON(),storyboard:runtime.storyboard.toJSON(),rig:runtime.rig.toJSON(),camera:runtime.camera.toJSON(),assets:runtime.assets.items,audio:runtime.audio.toJSON(),stage:runtime.stage.toJSON()};downloadJSON(projectFilename(runtime.project.name),data);return data};
+window.addStudioKeyframe=(property,time,value,easing="linear")=>{const t=runtime[property]||new KeyframeTrack(property);if(!runtime[property])runtime[property]=t;return t.add(time,value,easing)};
+window.getStudioKeyframe=(property,time)=>runtime[property]?.evaluate(time)??null;
