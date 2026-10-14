@@ -24,3 +24,5 @@ export function applyViseme(character,viseme){
   character.mouthViseme=viseme;
   character.mouthOpen=viseme==="REST"?0:viseme==="I"?0.25:viseme==="E"?0.4:viseme==="A"?0.65:viseme==="O"?0.8:viseme==="U"?0.55:0.35;
 }
+
+if(typeof window!=="undefined"){window.makeLipSyncTrack=makeLipSyncTrack;window.applyViseme=applyViseme;}
