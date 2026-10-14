@@ -1,0 +1,3 @@
+export function canvasBlob(canvas,type="image/png",quality=.92){return new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error("Canvas export failed")),type,quality))}
+export async function canvasDataURL(canvas,type="image/png",quality=.92){return canvas.toDataURL(type,quality)}
+export function makeSpriteSheet(canvases,columns=4){if(!canvases.length)throw new Error("No frames to export");const w=canvases[0].width,h=canvases[0].height,rows=Math.ceil(canvases.length/columns),out=document.createElement("canvas");out.width=w*columns;out.height=h*rows;const ctx=out.getContext("2d");canvases.forEach((c,i)=>ctx.drawImage(c,(i%columns)*w,Math.floor(i/columns)*h));return out}
