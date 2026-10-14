@@ -143,6 +143,10 @@ GitHub Pages hosts the static editor. The dynamic API and MySQL database must be
 
 ### Editor
 - [x] Core drawing canvas
+- [x] True raster layer canvases and compositing
+- [x] Layer visibility and opacity
+- [x] Pixel-preserving layer duplication
+- [x] Alpha eraser and safe horizontal flip
 - [x] Professional dock-style workspace
 - [x] Animation frame timeline
 - [x] Basic image FX stack
@@ -152,6 +156,7 @@ GitHub Pages hosts the static editor. The dynamic API and MySQL database must be
 - [ ] Onion skinning
 - [ ] Keyframes and animation tracks
 - [ ] Audio timeline
+- [ ] Audio library, procedural SFX, recording, waveform editing and music sequencing
 
 ### Anime Production
 - [x] Construction guides
@@ -171,6 +176,15 @@ GitHub Pages hosts the static editor. The dynamic API and MySQL database must be
 - [ ] Project cloud storage
 - [ ] Asset upload/storage service
 - [ ] Production API deployment
+
+## Development Build Identity
+
+- **Project:** Anime Studio
+- **Build name:** Anime Studio — 2D Production IDE
+- **Build ID:** AS-2D-2026.10.14
+- **Version:** 0.3.0-dev
+- **Developer:** ArkansasIo
+- **Build focus:** unified 2D drawing, animation, storyboard, audio and production workflow
 
 ## License
 
