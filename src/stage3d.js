@@ -80,7 +80,7 @@ export class AnimeStage3D{
     const mesh=new THREE.Mesh(geometry,material);
     group.add(mesh);
     group.position.z=z/20;
-    group.userData={name,parallax};
+    group.userData={name,parallax,baseY:group.position.y};
     this.root.add(group);
     this.cards.push(group);
     return group;
@@ -100,7 +100,7 @@ export class AnimeStage3D{
     const t=this.clock.getElapsedTime();
     this.cards.forEach((g,i)=>{
       const p=g.userData.parallax||1;
-      g.position.y+=Math.sin(t*.35+i)*.0005*p;
+      g.position.y=g.userData.baseY+Math.sin(t*.35+i)*.0005*p;
     });
     this.render();
   }
