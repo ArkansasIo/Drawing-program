@@ -28,3 +28,17 @@ document.querySelector("#speed").onclick=()=>document.querySelector("#genout").t
 document.querySelector("#grid").onchange=e=>document.querySelector("#guide").style.backgroundImage=e.target.checked?"linear-gradient(#ffffff12 1px,transparent 1px),linear-gradient(90deg,#ffffff12 1px,transparent 1px)":"none";
 document.querySelector("#symmetry").onchange=()=>{};
 status();
+
+const libraryData={
+"Characters":["Head & face","Eyes","Noses & mouths","Hair","Ears","Hands","Feet","Body anatomy","Poses","Gestures","Expressions","Ages & proportions","Chibi","Character design"],
+"Clothing":["School uniforms","Casual clothing","Fantasy armor","Kimono & yukata","Dresses","Shoes","Accessories","Folds & fabric"],
+"Creatures":["Anime animals","Fantasy creatures","Dragons","Monsters","Robots","Mecha","Birds","Aquatic creatures"],
+"Buildings":["Japanese houses","Apartments","Schools","Shrines & temples","Castles","Fantasy buildings","City streets","Stores & cafes","Skyscrapers","Industrial buildings"],
+"Environments":["Mountains","Forests","Beaches","Rivers","Urban streets","Night city","Countryside","Gardens","Space","Fantasy worlds"],
+"Vehicles":["Cars","Trains","Motorcycles","Bicycles","Aircraft","Spaceships","Mecha vehicles","Ships"],
+"Props":["Weapons","Furniture","Food","School supplies","Technology","Musical instruments","Signs","Fantasy props"],
+"Scenes":["Composition","Perspective","One-point perspective","Two-point perspective","Three-point perspective","Lighting","Weather","Day/night","Action scenes","Background layout"],
+"Manga":["Panel layouts","Speech bubbles","Sound effects","Speed lines","Screen tones","Impact effects","Storyboard pages"]
+};
+const lib=document.querySelector("#library");
+Object.entries(libraryData).forEach(([cat,items])=>{const box=document.createElement("div");box.className="libcat";box.innerHTML="<h4>"+cat+"</h4>";items.forEach(item=>{const b=document.createElement("button");b.textContent=item;b.onclick=()=>{document.querySelector("#genout").textContent="HOW TO DRAW — "+item+"\n\nStep 1: Basic construction\nStep 2: Proportions and perspective\nStep 3: Clean anime/manga line work\nStep 4: Details, lighting and finishing\n\nPractice this subject on the canvas.";document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));document.querySelector("#generator").classList.add("active")};box.appendChild(b)});lib.appendChild(box)});
