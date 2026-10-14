@@ -69,3 +69,9 @@ window.validateAnimeStudio=()=>validateStudioState({project:runtime.project,time
 window.exportAnimeStudioProject=()=>{const data={project:JSON.parse(runtime.project.serialize()),timeline:runtime.timeline.toJSON(),storyboard:runtime.storyboard.toJSON(),rig:runtime.rig.toJSON(),camera:runtime.camera.toJSON(),assets:runtime.assets.items,audio:runtime.audio.toJSON(),stage:runtime.stage.toJSON()};downloadJSON(projectFilename(runtime.project.name),data);return data};
 window.addStudioKeyframe=(property,time,value,easing="linear")=>{const t=runtime[property]||new KeyframeTrack(property);if(!runtime[property])runtime[property]=t;return t.add(time,value,easing)};
 window.getStudioKeyframe=(property,time)=>runtime[property]?.evaluate(time)??null;
+
+document.querySelector("#selectionClear")?.addEventListener("click",()=>{runtime.selection.clear();const s=document.querySelector("#transformStatus");if(s)s.textContent="Selection cleared."});
+document.querySelector("#cameraKeyframe")?.addEventListener("click",()=>{runtime.camera.keyframe(runtime.timeline.current);const e=document.querySelector("#cameraList");if(e)e.textContent+="\nKeyframe "+runtime.timeline.current});
+document.querySelector("#exportProject")?.addEventListener("click",()=>window.exportAnimeStudioProject());
+document.querySelector("#importProject")?.addEventListener("change",async e=>{const file=e.target.files?.[0];if(!file)return;try{const data=await readJSON(file);if(!validateProjectShape(data))throw new Error("Invalid Anime Studio project file");window.animeStudioImportedProject=data;out("PROJECT IMPORTED",JSON.stringify({name:data.name,scenes:data.scenes.length,version:data.version},null,2))}catch(err){out("PROJECT IMPORT ERROR",err.message)}});
+document.querySelector("#masterVolume")?.addEventListener("input",e=>runtime.audio.setMaster(+e.target.value/100));
