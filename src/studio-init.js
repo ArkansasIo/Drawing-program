@@ -47,3 +47,15 @@ if(gen)gen.addEventListener("click",()=>{
 
 window.generateCharacterParts=(options={})=>makeCharacterParts(options);
 window.generateClothing=(type,style)=>makeClothingSet(type,style);
+document.querySelector("#generateCharacter")?.addEventListener("click",()=>{
+  const style=document.querySelector("#style")?.value||"Modern Anime";
+  const asset=makeCharacterParts({style});
+  const out=document.querySelector("#genout");
+  if(out)out.textContent=JSON.stringify(asset,null,2);
+});
+document.querySelector("#generateClothing")?.addEventListener("click",()=>{
+  const style=document.querySelector("#style")?.value||"Modern Anime";
+  const asset=makeClothingSet("fantasy jacket",style);
+  const out=document.querySelector("#genout");
+  if(out)out.textContent=JSON.stringify(asset,null,2);
+});
