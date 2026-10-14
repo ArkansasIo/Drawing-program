@@ -207,3 +207,12 @@ Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) before openin
 ## Repository
 
 [ArkansasIo/Drawing-program](https://github.com/ArkansasIo/Drawing-program)
+
+
+## UI and Studio Controls
+- Dedicated Voice Over workspace with system voice preview, microphone takes, dialogue tracks and anime lip-sync markers.
+- Fill and eyedropper tools are wired to the active raster layer.
+- Audio import, soundtrack track creation and procedural browser sound generation are wired.
+- Studio Settings persist theme, autosave preference, grid, symmetry and default FPS in local storage.
+- Anime Studio identity is exposed as `anime-studio` for integration and diagnostics.
+- GitHub Pages validation includes all current `src/` production modules.
