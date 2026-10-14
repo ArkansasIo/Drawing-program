@@ -8,3 +8,8 @@ See:
 - [UML Architecture](docs/ARCHITECTURE.md)
 
 The editor is organized around a professional dock-based workflow: Viewport, Tool Dock, Content Browser, Details/Inspector, Timeline, and Storyboard.
+
+## 14. GIMP-inspired image editing
+The editor now includes an **Image FX** dock with an editable effect stack: grayscale, sepia, invert, brightness, contrast, saturation, and blur. Effects can be toggled or removed and are applied to PNG export while the original canvas pixels remain unchanged. This is a starter non-destructive workflow, not a complete implementation of GIMP's GEGL pipeline.
+
+See [GIMP Feature Research](docs/GIMP_FEATURE_RESEARCH.md) for feature mapping, official references, anime-oriented presets, and the staged roadmap for layers, masks, selections, transforms, color management, and plugins.
