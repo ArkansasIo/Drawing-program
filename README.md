@@ -220,3 +220,7 @@ Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) before openin
 
 ### Production Runtime Architecture
 The studio now has a modular runtime under `src/`: animation timeline, asset/provenance registry, storyboard, rigging, camera tracks, project persistence, tool registry, render queue, generator, lip-sync, 3D stage, and a central `studio-runtime.js` integration layer. The browser UI remains lightweight while production state is represented as serializable JavaScript objects suitable for future backend/cloud persistence.
+
+
+### Core Runtime Additions
+Selection geometry, keyframe interpolation/easing, multitrack audio state, project import/validation, serializable 2.5D stage state, command history, and JSON project export/import helpers are now implemented as dedicated source modules under `src/`.
