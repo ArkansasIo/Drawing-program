@@ -154,3 +154,27 @@ document.querySelector("#flipHorizontal")?.addEventListener("click",()=>{save();
 document.querySelector("#onionSkin")?.addEventListener("click",()=>{onion=!onion;document.querySelector("#onionSkin").textContent=onion?"◉ Onion Skin: ON":"◌ Onion Skin";renderComposite()});
 
 initLayers();
+
+
+/* Anime Studio production workspaces */
+const rigItems=[];
+const rigList=document.querySelector("#rigList");
+function renderRig(){if(!rigList)return;rigList.innerHTML=rigItems.map((x,i)=>"<div class='layer-row'><span>"+x.type+" • "+x.name+"</span><button data-rig='"+i+"'>×</button></div>").join("");rigList.querySelectorAll("[data-rig]").forEach(b=>b.onclick=()=>{rigItems.splice(+b.dataset.rig,1);renderRig()})}
+document.querySelector("#addBone")?.addEventListener("click",()=>{rigItems.push({type:"Bone",name:"Bone "+(rigItems.length+1)});renderRig()});
+document.querySelector("#addIK")?.addEventListener("click",()=>{rigItems.push({type:"IK",name:"IK Control "+(rigItems.length+1)});renderRig()});
+document.querySelector("#addRigAction")?.addEventListener("click",()=>{rigItems.push({type:"Action",name:"Action "+(rigItems.length+1)});renderRig()});
+
+const camera={zoom:1,rotation:0,bookmarks:[]};
+function updateCamera(){const z=document.querySelector("#cameraZoom"),r=document.querySelector("#cameraRotation");camera.zoom=(+(z?.value||100))/100;camera.rotation=+(r?.value||0);canvas.style.transform="scale("+camera.zoom+") rotate("+camera.rotation+"deg)"}
+document.querySelector("#cameraZoom")?.addEventListener("input",updateCamera);
+document.querySelector("#cameraRotation")?.addEventListener("input",updateCamera);
+document.querySelector("#cameraReset")?.addEventListener("click",()=>{camera.zoom=1;camera.rotation=0;document.querySelector("#cameraZoom").value=100;document.querySelector("#cameraRotation").value=0;updateCamera()});
+document.querySelector("#cameraBookmark")?.addEventListener("click",()=>{camera.bookmarks.push({zoom:camera.zoom,rotation:camera.rotation});const box=document.querySelector("#cameraList");if(box)box.textContent=camera.bookmarks.map((x,i)=>"Bookmark "+(i+1)+" • "+Math.round(x.zoom*100)+"% • "+x.rotation+"°").join("\n")});
+
+const assetItems=["Anime Character Base","Face Construction Sheet","Eyes & Expressions","Hair Silhouette Pack","School Uniform","Fantasy Armor","Japanese House","City Background","Forest Background","Mecha Parts","Magic FX","Speed Lines","Impact FX","Pose Reference","Sound Effect Library","Music Loop Library"];
+const assetLibrary=document.querySelector("#assetLibrary");
+function renderAssets(){if(!assetLibrary)return;const q=(document.querySelector("#assetSearch")?.value||"").toLowerCase();assetLibrary.innerHTML="";assetItems.filter(x=>x.toLowerCase().includes(q)).forEach(x=>{const b=document.createElement("button");b.textContent=x;b.onclick=()=>document.querySelector("#genout").textContent="ASSET\n\n"+x+"\n\nThis production asset is available as a project-library placeholder. Attach original or licensed source media before final distribution.";assetLibrary.appendChild(b)})}
+document.querySelector("#assetSearch")?.addEventListener("input",renderAssets);renderAssets();
+
+document.querySelector("#renderExport")?.addEventListener("click",()=>{const fmt=document.querySelector("#renderFormat").value.toLowerCase(),scale=+(document.querySelector("#renderScale").value||1),out=document.createElement("canvas");out.width=canvas.width*scale;out.height=canvas.height*scale;const ox=out.getContext("2d");ox.filter=activeFilterString();ox.drawImage(canvas,0,0,out.width,out.height);const mime=fmt==="jpeg"?"image/jpeg":fmt==="webp"?"image/webp":"image/png";const a=document.createElement("a");a.download="anime-studio-frame."+({"image/jpeg":"jpg","image/webp":"webp","image/png":"png"}[mime]);a.href=out.toDataURL(mime);a.click();const s=document.querySelector("#renderStatus");if(s)s.textContent="Exported "+fmt+" at "+scale+"×."});
+document.querySelector("#renderSequence")?.addEventListener("click",()=>{const s=document.querySelector("#renderStatus");if(s)s.textContent="Sequence export is staged; current build exports individual frames, with packaged ZIP/video rendering planned."});
